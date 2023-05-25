@@ -1,0 +1,718 @@
+---
+title: "inference_1"
+author: "NikolayNikolaev"
+date: "2023-05-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Concept 1.2 (Multiplication Rule): 
+
+```{r}
+#define the vectors for size, topping and order
+size = c("S", "M", "L")
+topping = c("pepperoni", "sausage", "meatball", "extra cheese")
+order = c("deliver", "pick-up")
+
+#keep track of the pizzas
+pizzas = character(0)
+
+#iterate over each value for each variable
+for(i in 1:length(size)){
+  for(j in 1:length(topping)){
+    for(k in 1:length(order)){
+      
+      #create a pizza
+      pizzas = rbind(pizzas, c(size[i], topping[j], order[k]))
+    }
+  }
+}
+
+#print out the pizzas; should have 24
+pizzas
+
+#count total number of large sausages; should get 2
+#   we divide by 3 because rows are length 3, and we want
+#   to convert back to number of rows (i.e., number of pizzas)
+length(pizzas[pizzas[ ,1] == "L" & pizzas[ ,2] == "sausage"])/3
+```
+## Concept 1.3 (Factorial): 
+- permutation: A ,B, C = 3! = 3x2x1 = 6
+- [ABC, ACB, BAC, BCA, CAB, CBA]
+
+
+```{r}
+library(combinat)
+#generate all of the possible permutations
+perms = combinat::permn(c("A", "B", "C", "D", "E", "F", "G"))
+
+#look at the first few permutations
+head(perms)
+
+#should get factorial(7) = 5040
+length(perms)
+
+```
+## Concept 1.4 (Binomial Coefficient): 
+- "n chose x" = $\binom{n}{x} = \frac{n!}{(n-x)!.(x!)}$
+- n=5, x = 3 => $\binom{5}{3} = \frac{5!}{(5-3)!.(3!)}$
+- the binomial coefficient gives the number of ways that x objects can be chosen from a population of n objects
+``` {r}
+library(gtools)
+#generate the committees (people labeled 1 to 5)
+committees = gtools::combinations(n = 5, r = 3)
+
+#should get choose(5, 3) = factorial(5)/(factorial(3)*factorial(2)) = 10 committees
+committees
+```
+
+
+|                   |Orfer Matters"      |Order Doesn't Matter|
+|-------------------|--------------------|---|
+|with replacement   | $n^k$              |$binom{n+k-1}{k}$|
+|without replacement| $\frac{n!}{(n-k)!}$| $\binom{n}{k}$|
+
+
+# Chapter 2 Conditional Probability
+
+## Concept 2.1 Law of Total Probability:
+
+$$ P(A) = P(A|B)P(B) + R(A|B^c)P(B^c)$$
+
+
+- is sunny = 0.95
+- is raining = 0.30
+
+- Total proability that goes to work - $P(W)$
+- $P(S)$ - the prob that it is sunny
+- $S$ 0- occur and $S^c$ does not occur
+
+$$P(W) = P(W|S)P(S) + P(W|S^c)P(S^c) = 0.95 x 06 + 0.3 x 0.4 = 0.69 $$
+```{r}
+#replicate
+set.seed(110)
+sims = 1000
+
+
+#create vectors to track if it is sunny/if Anne goes to work
+sun  = rep(0, sims)
+work = rep(0, sims)
+
+
+#run the loop
+for(i in 1:sims){
+  
+  #flip to see what the weather is
+  weather = runif(1)
+  
+  #flip to see if Anne goes to work
+  go = runif(1)
+  
+  #the case where it is sunny
+  if(weather <= .6){
+    
+    #mark that it was sunny
+    sun[i] = 1
+    
+    #Anne goes to work with probability .95 in this case
+    if(go <= .95){
+      work[i] = 1
+    }    
+  }
+  
+  #the case where it is rainy
+  if(weather > .4){
+    
+    #Anne goes to work with probability .3 in this case
+    if(go <= .3){
+      work[i] = 1
+    }
+  }
+}
+
+#we should get .6 for sun and .69 for work
+mean(sun); mean(work)
+```
+## Concept 2.2 Bayes’ Rule:
+
+### Bayesian Formula:
+
+$$ P(A|B) = \frac{P(B|A)P(A)}{P(B)}$$
+
+- $P(A|B) = \frac{P(A\cap B)}{P(B)} => P(A|B).P(B) = P(A \cap B)$
+- we know that: simetry => $P(A|B)P(B) = P(B|A)P(A)$
+- know dividing $P(B)$
+
+### Baye's Rule:
+
+$$ P(A|B) = \frac{P(B|A)P(A)}{P(A)P(B|A) + P(A^c)P(B|A^c)}$$
+```{r}
+#replicate
+set.seed(110)
+sims = 1000
+
+#set paths for Sam coming/Frodo making it
+Sam = rep(0, sims)
+Frodo = rep(0, sims)
+
+#run the loop
+for(i in 1:sims){
+  
+  #flip for each Sam and Frodo
+  Sam.flip = runif(1)
+  Frodo.flip = runif(1)
+  
+  #the case where Sam comes
+  if(Sam.flip <= .8){
+    
+    #mark that Sam came
+    Sam[i] = 1
+    
+    #Frodo makes it with .9 probability
+    if(Frodo.flip <= .9){
+      Frodo[i] = 1
+    }
+  }
+  
+  #the case where Sam didn't come
+  if(Sam.flip > .8){
+    
+    #Frodo makes it with .1 probability
+    if(Frodo.flip <= .1){
+      Frodo[i] = 1
+    }
+  }
+}
+
+#should get .8 overall for Sam
+mean(Sam)
+
+#find the mean of Sam conditioned on Frodo making it; should get .97
+mean(Sam[Frodo == 1])
+```
+
+## Concept 2.3 (Inclusion/Exclusion): 
+
+```{r}
+#replicate
+set.seed(110)
+sims = 1000
+
+#define different values of n to iterate over
+n = 2:10
+
+#set paths for the empirical and analytical solutions
+sol.a = rep(NA, length(n))
+sol.e = rep(NA, length(n))
+
+#iterate over n
+for(j in 1:length(n)){
+  
+  #first, calculate the analytical solution
+  k = 1:n[j]
+  sol.a[j] = sum((1/factorial(k))*(-1)^(k + 1))
+  
+  #now run the empirical simulation
+  #indicate if we get a match or not
+  match = rep(0, sims)
+  
+  #run the loop
+  for(i in 1:sims){
+    
+    #generate the 'random order' to give the babies out
+    babies = sample(1:n[j])
+    
+    #calculate 'ratios' of couple-to-baby. If the couple gets
+    #   their baby, ratio should be 1
+    ratios = babies/(1:n[j])
+    
+    #see if we got a match (at least 1 ratio is 1)
+    if(length(ratios[ratios == 1]) > 0){
+      match[i] = 1
+    }
+  }
+  
+  #mark the empirical probability
+  sol.e[j] = mean(match)
+}
+
+
+
+#graphics
+plot(n, sol.a, main = "Hospital Matching Problem",
+     xlab = "n", ylab = "P(At Least One Match)",
+     type = "p", lwd = 3, col = "firebrick3",
+     ylim = c(0, 1), pch = 16)
+lines(n, sol.e, col = "black", lwd = 3, 
+  type = "p", pch = 16)
+
+#put in the asymptotic result
+abline(h = 1 - 1/exp(1))
+
+#legend
+legend("topright", legend = c("Empirical Result", "Analytical Result"),
+       lty=c(2,2), lwd=c(2.5,2.5),
+       col=c("black", "red"))
+```
+
+## Concept 2.4 (Independence): 
+
+Two events are independent if knowing the outcome of one event does not affect the probability of the other event occurring. 
+
+
+## Properties of Random Variables
+### Concept 2.5 (Distribution): 
+
+- describes the ‘pattern’ that the random variable follows
+- Each distribution has it’s own properties (expectation, variance, probability mass function, etc.)
+
+### Concept 2.6 (Expectation):
+- A random variable’s expectation is another name for its average, and it is denoted by  $E(X)$ (which means, in english, ‘the expectation of random variable  $X$’).
+
+### Concept 2.7 (Variance): as the name ovetly suggest, this describes how much spread is inherent in a certain random variable, and is notated $Var(X)$ - the variance of the random variable $X$
+
+### Concept 2.8 (PMFs and CDFs): 
+Random variables have **probability mass functions**, or **PMFs** (for discrete random variables), and **probability density functions**, or **PDFs** (for continuous random variables).
+
+- the **PMF** gives the probability that the random variable takes on a certain value. $P(X=x)$
+  - $x$ represents the value that the random variable $X$ takes on.
+  
+- the **PMF** is the **cumulative density function** (which is the same for continuous and discrete variables; both have CDFs, there is no CMF!
+
+This gives $P(X=< x)$ or the probability that a random variable take on the value x or less. 
+- notation **CDF** = $F(x)$
+- the CDF is the sum of the PMF up to a specific point
+- properties:
+  - they are increasing functions, right-continuous (when you approach from the right, they are continuous)
+  - approach $0$ as $x$ approach $-\infty$ - nothing is smaller than negative infinity
+  - 1 as x approaches $\infty$ = everything is smaller then infinity
+  
+### Concept 2.9 (Support): 
+The support of a distribution is simply the set of possible values that the random variable can take on.
+
+For example, if you had a random variable that could only spit out negative numbers or 0, then the support would be negative infinity to 0.
+
+```{r}
+#replicate
+set.seed(110)
+sims = 1000
+
+#generate winnings
+winnings = sample(c(10, 0, -5), sims, replace = TRUE, prob = c(2/6, 3/6, 1/6))
+
+#the mean and variance should match above (2.5 and 31.25)
+mean(winnings); var(winnings)
+```
+
+### Binomial
+- discrete distribution: discrete values (like: 1,2,3) not continuous values(like all of the values between 1 and 2)
+- the support is dicrete
+
+the Binomial is we perform  
+n
+  independent trials, each with only two outcomes (usually we think of these two outcomes as success or failure) and with a probability of success   $p$
+  that stays constant from trial to trial.
+  
+$X$~$Bin(n,p)$ - X has the dostobution Binomial with parameters n and p
+
+-n and p - are the parameters of the distribution
+- n - number oftrials
+- p - the probability of success on each trial
+
+The parameters are very important: in addition to the specific distribution, they essentially give us all the information we need about a specific random variable, and they will soon fuel our calculations of expectation, variance and probability mass (they govern the distribution). You should get familiar with defining a Binomial distribution with these parameters given some sort of verbal set up (or ‘story’)
+
+- $E(X) = np$
+- $Var(X) = n.p.q$
+  - $q=1-p$
+  
+- $P(X=x) = \binom{n}{x} p^x q^{n-x}$
+
+- the support of a binomial is the integers 0 to n, inclusive.
+
+
+```{r}
+#find P(X = 3), where X ~ Bin(10, 1/2)
+dbinom(3, 10, 1/2)
+
+#find P(X <= 6), where X ~ Bin(15, 1/3)
+pbinom(6, 15, 1/3)
+
+#find the value of x such that P(X <= x) = .9, where X ~ Bin(50, 1/5)
+qbinom(.9, 50, 1/5)
+
+#generate 5 random draws from X, where X ~ Bin(30, 1/4)
+rbinom(5, 30, 1/4)
+
+
+```
+
+# Chapter 3: Discrete Random Variables
+
+- a random variable is a function that maps a sample space onto the real line.
+
+- two dice: combination ${1,1}, ..., {6,6}$ total 36
+- X - is the sum of the two die rolls - this maps our sample space S to {2,3,4...12}
+- Y - the average - {1,1.5, ... , 5.5, 6}
+- Both   X and   Y are random variables because they take our sample space and map it to some real number
+-  There are different ‘types’ of random variables (different ‘recipes’) that spit out random numbers in different ways: different Distributions 
+- Random variables are governed by parameters . They have Expectations (essentially the average of the random variable) and Variances (the spread of the values that a random variable spits out). 
+- Random variables also have PDFs/PMFs, depending on if they are continuous or discrete (notated by  $P(X=x)$  and  
+$f(x)$ ) that give the probability (or ‘density,’ in the continuous case) of a random variable crystallizing in a specific area. They also have CDFs (notated by  
+$F(X)$), which are increasing, right continuous functions that give the probability that a random variable takes on a value less than or equal to a certain number:  
+$P(X≤x)$ . Unsurprisingly, CDFs approach 0 as values approach  $−∞$
+ , and 1 as values approach  $∞$(the probability that our random variable takes on a value smaller than  $−
+∞$ is 0 and the probability that it takes on a value smaller than  $∞$ is 1, because nothing is smaller than  $−∞$ or larger than  $∞$).
+
+## BERTNOULLI:
+
+$X∼ Bern(p)$ , where X is a Bernoulli random variable with probability of success  p
+
+Variance ì p(1-п)
+
+- Binoial Variance is np(1-p)
+
+PMF = P(X=x) = p^x(1-p)^{1-x}
+X = [0,1]
+
+Fundamental Bridge = P(X=1) = E(X)
+
+## Geometric
+
+$\frac{1-p}{p}$
+
+Variance = $\frac{1-p}{p^2}$
+
+PMF-  $P(X=x) = (1-p)^x(p)$
+
+Geometric distribution, which counts the number of failures before the first success for repeated, independent trials with a constant probability  
+p
+  of success. The First Success distribution counts the numbers of failures and the first success; it’s simply the Geometric shifted by 1
+  
+That is, if $X~ Geom(p)$ and Y=X+1 then Y~FS(p) where FSA stads for First Success
+
+expectation of first success - 1/p
+
+PMF of X~FS(p) = P(X=x) = (1-p)^{x-1}.p
+
+Var(FS) = $\frac{1-p}{p^2}$
+
+## Negatiove Binomial:
+- extention of geometric
+- X- count the number of failures before our $r^{th}$ success, where wach trial has probability p of success.
+
+Expectation: like geometric multipole by $r$
+
+- $\frac{r(1-p)}{p}$
+- $\frac{r(1-p)}{p^2}$
+
+- PMF: $P(X=x) = \binom{x+r-1}{r-1} p^r(1-p)^x$
+
+
+## Poisson:
+- most widely used distribution in modeling real world phenomena
+- The Story goes: if we have many chances at success (i.e., many trials), each with a very small probability of success, then we can use the Poisson to model the total number of occurrences of the event. Ex: lotery ticket
+
+$X= Pois(\lambda)$
+
+- One of the reasons that the Poisson is so useful is that we can use it for approximations.
+
+Poisson Paradigm: events$A_1,...A_n$ = $Pois(\lambda)$ where $\lambda = \sum_{j=1}^n p_j$
+
+This is extremely useful because, if we are approximating, then we don’t need all of the  $A_j$
+  events to be independent (they can be weakly dependent) or all of the  $p_j$ probabilities to be the same (they can be slightly different).
+  
+  - $\lambda$ - as sor of a rate of occurance or number of occurance. 
+  
+  PMF: $P(X=x) = \frac{e^{-\lambda}. \lambda^x}{x!}$ - $x \in{1,2...\infty}$
+  
+  if $n-> \infty$ then $p-> 0$
+  
+## Expectation, Indicators and Memorylesssness
+
+1. Expectation:
+- $E[X] = \sum_i x_i.P(X=x_i)$
+
+- First, Expectation is a linear operator, which means for our purposes it has a couple of nice properties:
+$E[X+Y]= E[X] + E[Y]$ - X and Y are dependent random variables.
+
+
+$E[aX] = a.E[X]$
+
+2. Variance: 
+$Var(X) = E[X^2] - (E[X])^2$
+- $(E[X])^2$ is the square the mean
+- $E[X^2]$ 
+
+3. Indicators:
+Bernouli rv - $I_A$ is an indicator random variable that takes on the value 1 if event A occurs and the value 0 if event A does not occur.
+
+- say that A occurs wotj probability p, so $P(I_A=1)= p$ and $P(I_A=0)= 1-p$
+
+```{r}
+#replicate
+set.seed(110)
+sims = 1000
+
+#define different values of n to iterate over
+n = 2:10
+
+#keep track of mean number of matches
+means = rep(NA, length(n))
+
+#iterate over n
+for(j in 1:length(n)){
+  
+  #count number of matches
+  match = rep(0, sims)
+  
+  #run the loop
+  for(i in 1:sims){
+    
+    #generate the 'random order' to give the babies out
+    babies = sample(1:n[j])
+    
+    #calculate 'ratios' of couple-to-baby. If the couple gets
+    #   their baby, ratio should be 1
+    ratios = babies/(1:n[j])
+    
+    #count how many matches we got
+    match[i] = length(ratios[ratios == 1])
+  }
+  
+  #find the mean
+  means[j] = mean(match)
+}
+
+#should be a vector filled with 1
+means
+```
+## Memorylessness
+E(T) = 10 - (and, in fact, the distribution of   T going forward is the same as the marginal distribution of   T ).
+
+
+Geometric is in fact memoryless: $P(X>= n+k| X >= n) = P(X >= k)$
+
+```{r}
+#replicate
+set.seed(110)
+sims = 1000
+
+#define simple parameters (n, p for binomial and geometric) and value of k
+n = 10
+p.geom = 1/10
+p.binom = 7/10
+k = 5
+
+#generate the r.v.s
+X = rgeom(sims, p.geom)
+Y = rbinom(sims, n, p.binom)
+
+#graphics
+#set graphic grid
+par(mfrow = c(2,2))
+
+#overall histogram
+hist(X, main = "X ~ Geom(p)", xlab = "", freq = FALSE,
+     col = rgb(1, 0, 0, 1/4))
+
+#condition
+hist(X[X > k] - k, main = "(X - k)|X > k", freq = FALSE,
+     xlab = "", col = rgb(1, 0, 0, 1/4))
+
+
+#overall histogram
+hist(Y, main = "Y ~ Bin(n, p)", xlab = "", freq = FALSE,
+     col = rgb(0, 0, 1, 1/4))
+
+#condition
+hist(Y[Y > k] - k, main = "(Y- k)|Y > k", freq = FALSE,
+     xlab = "", col = rgb(0, 0, 1, 1/4))
+#re-set graphic state
+par(mfrow = c(1,1))
+```
+  # Continuous Random Variables:
+
+```{r}
+  #replicate
+set.seed(110)
+
+#generate the random variable; X ~ Bin(10, 1/2)
+X = rbinom(1000, 10, 1/2)
+
+#compare; should get 10*1/2*1/2 = 2.5
+var(X); mean(X^2) - mean(X)^2
+```
+
+## Uniform:
+
+The Story of a Uniform distribution is just that it generates a completely random number in some segment. That is, if  
+X is  $Unif(a,b)$
+ , then  Xgenerates a random number between  a and  b
+
+Standard Uniform - U(0,1)
+  
+PDF must be constant on the entire length of the interval. 
+
+$$\int_a^b c.dx = 1$$
+
+$$|_a^b cx = c(b-a)= 1$$ 
+
+=> $c=\frac{1}{b-a}$
+
+CDF = $P(X =< t ) = \int_a^t \frac{1}{b-a}dx = |_a^t \frac{x-a}{b-a} = \frac{t-a}{b-a}$
+
+Expectaton" $E[X] = \int_a^b \frac{x}{b-a} = |_a^b \frac{x^2}{b-a} = \frac{b^2 -a^2}{2(b-a)}= \frac{b+a}{2}$
+
+Variance: $E[X^2] = \int_a^b \frac{x^2}{b-a}dx$
+
+distribution X that has CDF-F
+$$X = F^{-1}(U)$$ then X has the CDF -F
+if you start with any CDF you want (provided it’s increasing and continuous), then plug in  
+U
+  to the inverse CDF, you have just created a random variable that follows the original CDF.
+
+
+# Exponential distributiion:
+
+```{r}
+#set grid
+par(mfrow = c(1,2))
+
+#Exponential
+hist(rexp(1000), col = rgb(1, 0, 0, 1/2),
+     main = "Exponential Distribution",
+     xlab = "")
+
+#transformed Uniform
+hist(-log(1 - runif(1000)), col = rgb(0, 1, 0, 1/2),
+     main = "-ln(1 - U)", xlab = "")
+#re-set graphics
+par(mfrow = c(1,1))
+```
+```{r}
+#generate the r.v., an Expo(1)
+X = rexp(1000, 1)
+
+#plot F(X)
+hist(pexp(X, 1), col = rgb(0, 0, 1, 1/2),
+     main = "F(X)", xlab = "")
+```
+## Normal == GAUSSIAN
+
+The chief reason why the Normal Distribution is so important is because of a result called the Central Limit Theorem (CLT), probably the most widely used theorem in all of Statistics. 
+
+Story of the Normal Distribution, and you can always think of it as the bell curve that appears when you add up a bunch of random variables. It’s governed by two parameters: $\mu$ and $\sigma^2$
+- $\sigma$ - standard deviation
+
+Like we define $Unif(0,1)$ there is a Standard Normal. This is just a Normal centered at 0 with variance of 1, or N(0,1). We often by conventional notation, call the Standard Normal Z, such that X~N(0,1)
+
+Z: PDF $e^{-z^2/2}$ term (this gives the nice, smooth, symetric bell curve)
+and rest will be a constant(does not include z)
+- $-\infty$ to $\infty$ this is the support 
+
+PDF $f(z) = \frac{1}{\sqrt{2\pi}}.e^{-z^2/2}$ 
+
+$f(-x) = -f(x)$
+
+$$\Phi(t) = \frac{1}{2\pi} \int_{-\infty}^t e^{-z^2/2} dz$$
+```{r}
+#half of the Normal is below 0
+pnorm(0)
+#68-95-99.7 Rule
+pnorm(1) - pnorm(-1); pnorm(2) - pnorm(-2); pnorm(3) - pnorm(-3)
+#plot the CDF
+plot(seq(from = -3, to = 3, length.out = 100), pnorm(seq(from = -3, to = 3, length.out = 100)),
+     xlab = "x", ylab = "P(X <= x)", main = "CDF of X where X ~ N(0, 1)",
+     type = "p", pch = 16)
+
+```
+
+we can create any Normal Distribution from the Standard Normal by shifting and stretching it via location and scale transformations.
+
+$$X = \mu  +\sigma Z$$
+
+### Concept 4.1: Linear Combination of Normals 
+If we start with a Normal random variable and add or multiply a constant, the new random variable is Normally distributed. Further, if we add independent Normal random variables together, the sum is also Normally distributed.
+
+This process, converting a Normal Distribution back to the Standard Normal, is a process called standardization. You might have heard before of “z-scores,” which are essentially values, minus the mean of the distribution and divided by the standard deviation. That’s exactly what standardization is; we’re just converting to a value and seeing where it falls in the Standard Normal distribution,  
+Z
+ , because it’s much easier to work with.
+ 
+ ## Exponential
+ 
+ Expectation $\frac{1}{\lambda}$
+
+Variance $\frac{1}{\lambda^2}$
+
+```{r}
+#define a simple parameter
+lambda = 1/5
+
+#generate the r.v.'s
+X = rexp(sims, lambda)
+Y = rexp(sims, 1)
+
+#compare the histograms; they should match
+#set graphic grid
+par(mfrow = c(1,2))
+
+#Expo(1)
+hist(Y, main = "Expo(1)",
+     xlab = "", col = rgb(1, 0, 0, 1/4))
+
+#lamda*Expo(lambda)
+hist(lambda*X, main = "Scaled Exponential",
+     xlab = "", col = rgb(0, 1, 0, 1/4))
+
+#re-set graphic state
+par(mfrow = c(1,1))
+```
+
+#### Minimum of Exponential
+
+#### Memorylessnes
+
+```{r}
+#replicate
+set.seed(110)
+sims = 1000
+
+#define simple parameters (n, p for binomial and geometric) and value of k
+n = 10
+lambda = 1/10
+mu = 3
+sigma = 1
+k = 5
+
+#generate the r.v.s
+X = rexp(sims, lambda)
+Y = rnorm(sims, mu, sigma)
+
+#graphics
+#set graphic grid
+par(mfrow = c(2,2))
+
+#overall histogram
+hist(X, main = "X ~ Expo(lambda)", xlab = "", freq = FALSE,
+     col = rgb(1, 0, 0, 1/4))
+
+#condition
+hist(X[X > k] - k, main = "(X - k)|X > k", freq = FALSE,
+     xlab = "", col = rgb(1, 0, 0, 1/4))
+
+
+#overall histogram
+hist(Y, main = "Y ~ N(mu, sigma^2)", xlab = "", freq = FALSE,
+     col = rgb(0, 1, 0, 1/4))
+
+#condition
+hist(Y[Y > k] - k, main = "(Y- k)|Y > k", freq = FALSE,
+     xlab = "", col = rgb(0, 1, 0, 1/4))
+
+#re-set graphic state
+par(mfrow = c(1,1))
+```
+
+# MOMENT GENERATING FUNCTIONS:

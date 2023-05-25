@@ -1,0 +1,326 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={inference\_1},
+  pdfauthor={NikolayNikolaev},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{inference\_1}
+\author{NikolayNikolaev}
+\date{2023-05-18}
+
+\begin{document}
+\maketitle
+
+\hypertarget{concept-1.2-multiplication-rule}{%
+\subsection{Concept 1.2 (Multiplication
+Rule):}\label{concept-1.2-multiplication-rule}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#define the vectors for size, topping and order}
+\NormalTok{size }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{"S"}\NormalTok{, }\StringTok{"M"}\NormalTok{, }\StringTok{"L"}\NormalTok{)}
+\NormalTok{topping }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{"pepperoni"}\NormalTok{, }\StringTok{"sausage"}\NormalTok{, }\StringTok{"meatball"}\NormalTok{, }\StringTok{"extra cheese"}\NormalTok{)}
+\NormalTok{order }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{"deliver"}\NormalTok{, }\StringTok{"pick{-}up"}\NormalTok{)}
+
+\CommentTok{\#keep track of the pizzas}
+\NormalTok{pizzas }\OtherTok{=} \FunctionTok{character}\NormalTok{(}\DecValTok{0}\NormalTok{)}
+
+\CommentTok{\#iterate over each value for each variable}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(size))\{}
+  \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(topping))\{}
+    \ControlFlowTok{for}\NormalTok{(k }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(order))\{}
+      
+      \CommentTok{\#create a pizza}
+\NormalTok{      pizzas }\OtherTok{=} \FunctionTok{rbind}\NormalTok{(pizzas, }\FunctionTok{c}\NormalTok{(size[i], topping[j], order[k]))}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{\#print out the pizzas; should have 24}
+\NormalTok{pizzas}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       [,1] [,2]           [,3]     
+##  [1,] "S"  "pepperoni"    "deliver"
+##  [2,] "S"  "pepperoni"    "pick-up"
+##  [3,] "S"  "sausage"      "deliver"
+##  [4,] "S"  "sausage"      "pick-up"
+##  [5,] "S"  "meatball"     "deliver"
+##  [6,] "S"  "meatball"     "pick-up"
+##  [7,] "S"  "extra cheese" "deliver"
+##  [8,] "S"  "extra cheese" "pick-up"
+##  [9,] "M"  "pepperoni"    "deliver"
+## [10,] "M"  "pepperoni"    "pick-up"
+## [11,] "M"  "sausage"      "deliver"
+## [12,] "M"  "sausage"      "pick-up"
+## [13,] "M"  "meatball"     "deliver"
+## [14,] "M"  "meatball"     "pick-up"
+## [15,] "M"  "extra cheese" "deliver"
+## [16,] "M"  "extra cheese" "pick-up"
+## [17,] "L"  "pepperoni"    "deliver"
+## [18,] "L"  "pepperoni"    "pick-up"
+## [19,] "L"  "sausage"      "deliver"
+## [20,] "L"  "sausage"      "pick-up"
+## [21,] "L"  "meatball"     "deliver"
+## [22,] "L"  "meatball"     "pick-up"
+## [23,] "L"  "extra cheese" "deliver"
+## [24,] "L"  "extra cheese" "pick-up"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#count total number of large sausages; should get 2}
+\CommentTok{\#   we divide by 3 because rows are length 3, and we want}
+\CommentTok{\#   to convert back to number of rows (i.e., number of pizzas)}
+\FunctionTok{length}\NormalTok{(pizzas[pizzas[ ,}\DecValTok{1}\NormalTok{] }\SpecialCharTok{==} \StringTok{"L"} \SpecialCharTok{\&}\NormalTok{ pizzas[ ,}\DecValTok{2}\NormalTok{] }\SpecialCharTok{==} \StringTok{"sausage"}\NormalTok{])}\SpecialCharTok{/}\DecValTok{3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2
+\end{verbatim}
+
+\hypertarget{concept-1.3-factorial}{%
+\subsection{Concept 1.3 (Factorial):}\label{concept-1.3-factorial}}
+
+\begin{itemize}
+\tightlist
+\item
+  permutation: A ,B, C = 3! = 3x2x1 = 6
+\item
+  {[}ABC, ACB, BAC, BCA, CAB, CBA{]}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(combinat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'combinat'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:utils':
+## 
+##     combn
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#generate all of the possible permutations}
+\NormalTok{perms }\OtherTok{=}\NormalTok{ combinat}\SpecialCharTok{::}\FunctionTok{permn}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"A"}\NormalTok{, }\StringTok{"B"}\NormalTok{, }\StringTok{"C"}\NormalTok{, }\StringTok{"D"}\NormalTok{, }\StringTok{"E"}\NormalTok{, }\StringTok{"F"}\NormalTok{, }\StringTok{"G"}\NormalTok{))}
+
+\CommentTok{\#look at the first few permutations}
+\FunctionTok{head}\NormalTok{(perms)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [[1]]
+## [1] "A" "B" "C" "D" "E" "F" "G"
+## 
+## [[2]]
+## [1] "A" "B" "C" "D" "E" "G" "F"
+## 
+## [[3]]
+## [1] "A" "B" "C" "D" "G" "E" "F"
+## 
+## [[4]]
+## [1] "A" "B" "C" "G" "D" "E" "F"
+## 
+## [[5]]
+## [1] "A" "B" "G" "C" "D" "E" "F"
+## 
+## [[6]]
+## [1] "A" "G" "B" "C" "D" "E" "F"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#should get factorial(7) = 5040}
+\FunctionTok{length}\NormalTok{(perms)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5040
+\end{verbatim}
+
+\hypertarget{concept-1.4-binomial-coefficient}{%
+\subsection{Concept 1.4 (Binomial
+Coefficient):}\label{concept-1.4-binomial-coefficient}}
+
+\begin{itemize}
+\tightlist
+\item
+  ``n chose x'' = \(\binom{n}{x} = \frac{n!}{(n-x)!.(x!)}\)
+\item
+  n=5, x = 3 =\textgreater{} \(\binom{5}{3} = \frac{5!}{(5-3)!.(3!)}\)
+\item
+  the binomial coefficient gives the number of ways that x objects can
+  be chosen from a population of n objects
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(gtools)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'gtools' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#generate the committees (people labeled 1 to 5)}
+\NormalTok{committees }\OtherTok{=}\NormalTok{ gtools}\SpecialCharTok{::}\FunctionTok{combinations}\NormalTok{(}\AttributeTok{n =} \DecValTok{5}\NormalTok{, }\AttributeTok{r =} \DecValTok{3}\NormalTok{)}
+
+\CommentTok{\#should get choose(5, 3) = factorial(5)/(factorial(3)*factorial(2)) = 10 committees}
+\NormalTok{committees}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       [,1] [,2] [,3]
+##  [1,]    1    2    3
+##  [2,]    1    2    4
+##  [3,]    1    2    5
+##  [4,]    1    3    4
+##  [5,]    1    3    5
+##  [6,]    1    4    5
+##  [7,]    2    3    4
+##  [8,]    2    3    5
+##  [9,]    2    4    5
+## [10,]    3    4    5
+\end{verbatim}
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+& Orfer Matters'' Order Doesn't Matter & \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+with replacement & n\^{}k & binom\{n+k-1\}\{k\} \\
+without replacement & \frac{n!}{(n-k)!} & \binom{n}{k} \\
+\end{longtable}
+
+\end{document}
