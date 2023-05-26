@@ -1,0 +1,146 @@
+---
+title: "Bayes_1_Specificazione della_distribuzione_a_priori"
+author: "NikolayNikolaev"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Bayes_1_Specificazione della_distribuzione_a_priori
+
+Si intende stimare la proporzione di soggetti che soffrono di sintomi gravi dovuti al COVID-19
+e non sono vaccinati nella popolazione italiana.
+
+• In base alle attuali conoscenze a priori si assume 0.3 come valore plausibile per la
+mediana della distribuzione e 0.5 come valore plausibile per il 90-esimo percentile della
+distribuzione a priori.
+• Si utilizza la funzione beta.select della libreria LearnBayes per determinare i
+parametri $\alpha_1$
+e $\beta_1$ della distribuzione a priori con la funzione seguente `learnBayes::beta.select`.
+Le misure di posizione devono essere definite come una lista specificando la mediana
+quantile1 ed il novantesino centile quantile2 della distribuzione
+
+```{r}
+quantile1 <- list(p = 0.5, x=0.3)
+quantile1
+
+quantile2 <- list(p = 0.9, x=0.5)
+quantile2
+```
+
+La funzione beta.select restituisce i valori dei due parametri della distribuzione Beta che
+rispettano i vincoli imposti
+
+```{r}
+require(LearnBayes)
+beta.select(quantile1, quantile2)
+```
+
+da cui risulta la distribuzione a priori $p(\theta)$ ~ $Beta(3.26, 7.19)$ e la proporzione media di 
+ipertesi nella popolazione in base alle conoscenza a priori e':
+
+```{r}
+M <- 3.26/(3.26+7.19); M
+```
+
+## 1. Determinazione della distribuzione a posteriori.
+Supponendo di osservare adesso un campione casuale di persone ricoverate per covid-19 in
+un’ospedale della zone e di riscontrare che su 12 pazienti complessivi ($n_1$
+) pazienti 6 non risultano vaccinati. Nel seguito si utilizza $k_1 = 6$ - sucessi e $f_1 = (n_1- k_1)$
+- insucessi
+
+Si disegna - la distribuzione a priori:
+- verosimiglianza
+- la distribuzione a posteriori
+
+```{r}
+alpha1 <- 3.26
+beta1 <- 7.19
+n1 <- 12
+k1 <- 6
+# a priori
+pval <- seq(0,1, by = 0.01)
+plot(pval, dbeta(pval,alpha1, beta1),
+xlab="p",
+ylab="Densità",
+ylim=c(0,7),
+lty=3,
+lwd=4,
+col="green")
+# verosimiglianza
+lines(pval,dbeta(pval, k1+1,n1-k1+1),
+lty = 2,
+lwd = 1, col = "darkblue")
+# a posteriori
+lines(pval, dbeta(pval,
+k1 + alpha1,
+n1-k1+beta1),
+lty=1,lwd=4,
+col="orange")
+
+legend("topright",
+c("a Priori","Verosimiglianza","a Posteriori"),
+lty=c(1,3,1),
+lwd=c(3,3,3),
+col=c("green", "blue","orange" ),
+cex = 0.7)
+
+```
+
+• Si nota che la distribuzione di riferimento per l’inferenza ovvero la distribuzione a posteriori è un compromesso tra la distribuzione iniziale che ha portato ad ipotizzare certi
+valori per il parametro (e che è abbastanza informativa) e la verosimiglianza basata
+sulle rilevazioni effettuate con il campione che è abbastanza diversa dalla prior.
+• La media della distribuzione a posteriori si trova tra la media della prior e quella della
+verosimiglianza.
+• La distribuzione a posteriori ha una variabilità ridotta rispetto alla variabilità della
+distribuzione iniziale.
+
+## 2. Aggiornamento della distribuzione a posteriori
+Supponendo di osservare un altro campione di pazienti ricoverati in un altro ospedale di
+Milano la distribuzione a posteriori viene aggiornata in base alle nuove evidenze empiriche.
+Su 27 pazienti ricoverati per covid-19, 19 risultano senza vaccino $n = 27+12 = 39, k = 19+6
+= 25$.
+
+Il confronto grafico tra la prima e la seconda distribuzione a posteriori ci permette di stabilire
+come si modifica l’inferenza sul parametro quando le evidenze dei dati sono maggiori
+
+```{r}
+k <- 19 +k1
+n<- 39
+# a posteriori aggiornata
+plot(pval, dbeta(pval,
+alpha1 + k,
+beta1+n-k),
+xlab="p",
+type = "l",
+ylab="Densità",
+ylim=c(0,7),
+lty=1,
+lwd=3,
+col="blue")
+# a posteriori campione 1
+lines(pval, dbeta(pval,
+k1 + alpha1,
+n1-k1+beta1),
+lty=1,lwd=3,
+col="orange",
+add=TRUE)
+legend("topleft",
+c("a Posteriori aggiornata", "a Posteriori camp. 1"),
+lty=c(1,1),
+lwd=c(3,3),
+col=c("blue", "orange" ),
+cex = 0.6)
+```
+
+Il valore atteso della distribuzione a posteriori aggiornata con le ulteriori evidenze campionarie è
+
+```{r}
+(alpha1+k)/(n+alpha1 + beta1)
+```
+
+Notiamo che la distribuzione a posteriori è proporzionale al prodotto della prior e della
+verosimiglianza.

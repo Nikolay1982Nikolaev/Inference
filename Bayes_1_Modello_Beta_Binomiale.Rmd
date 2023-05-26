@@ -1,0 +1,168 @@
+---
+title: "Bayes_1_Modello_Beta_Binomiale"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Modello Beta-Binomiale
+
+In un campione di 20 (n) pazienti, 13 (k) pazienti sono ipertesi. SI ipotizza un modello Beta 
+Binomiale per stimare la proporzione di pazienti nella popolazione di riferimento.
+
+Si disegna per stimare a posteriori in base a diverse formulazioni della distribuzione a priori.
+
+Si considerano i seguenti tre scenari
+1. distribuzione a priori uniforme $\alpha=1, \beta=1$
+2. distribuzione a priori con $\alpha, \beta <1$
+3. distribuzione a priori con $\alpha, \beta > 1$
+
+## Scenario 1:
+
+Sappendo che la distribuzione a priori per il parametro $\theta$ che rappresenta la probabilita di successi (ipertesi) sia una $Beta(\alpha, \beta)$ tale che $\alpha=\beta = 1$.
+  
+La verosimiglianza e' una Binomiale in cui kernel e' proporzionale alla Beta con parametri $\binom{\alpha = k+1}{\beta=n-k+1}$ (dispensa di teoria)
+
+La distribuzione a posteriori e' ancora una Beta con parametri $(\alpha + k)$ and $(\beta +n -k)$
+
+Nel seguente rafico si visualizzano le tre distribuzioni:
+---
+```{r}
+alpha <- 1
+beta  <- 1
+pval  <-seq(0,1,by=0.01)
+
+## distribuzione a priori
+plot(pval, dbeta(pval,alpha,beta),
+type = "l", col = "blue", ylim = c(0,6),
+ylab = "Densità", xlab = "theta",
+main = "Scenario 1")
+
+## verosimiglianza
+n <- 20
+k <- 13
+lines(pval, dbeta(pval, k+1, n-k+1),
+      lwd = 2,
+col = "darkblue")
+## distribuzione a posteriori
+lines(pval, dbeta(pval, k+alpha, n-k+beta),
+      lwd = 1,
+      col = "red")
+legend("topleft",
+       c("a Priori","Verosimiglianza","a Posteriori"),
+       lty=c(1,1,1),
+       lwd=c(1,2,1),
+       col=c( "blue","darkblue","red" ), cex=0.6)
+```
+
+
+La numerosità campionaria è esigua. Si evince che nel caso in cui la prior non è informativa
+(scenario 1) la distribuzione a posteriori coincide con la verosimiglianza.
+
+Il valore atteso della distribuzione a posteriori costistituisce la stima puntuale Bayesiana per il 
+parametro.
+```{r}
+(alpha + k)/(n+alpha + beta)
+```
+la proporzione di ipertesi nella popolazione è 0.64.
+
+La moda della distribuzione a priori è un’altra stima puntuale per il parametro e coincide
+con la stima di massima verosimiglianza
+```{r}
+(alpha + k -1)/(n + alpha + beta -2)
+```
+
+## Scenario 2:
+Scegliendo come parametri della distribuzione a priori quelli proposti da Jeffrey ovvero $\alpha = 0.5$
+and $\beta=0.5$ la prior non e' molto informativa.
+
+```{r}
+alpha <- 0.5
+beta<- 0.5
+# distribuzione a priori
+pval<-seq(0,1,by=0.01)
+plot(pval, dbeta(pval,alpha,beta),
+type = "l", col = "blue", ylim = c(0,6),
+ylab = "Densità", xlab = "theta", main = "Scenario 2")
+# verosimiglianza
+lines(pval, dbeta(pval, k+1, n-k+1),
+lwd = 2,
+col = "darkblue")
+# distribuzione a posteriori
+lines(pval, dbeta(pval, k+alpha, n-k+beta),
+lwd = 1,
+col = "red")
+legend("topleft",
+c("a Priori","Verosimiglianza","a Posteriori"),
+lty=c(1,1,1),
+lwd=c(1,2,1),
+col=c( "blue","darkblue","red" ), cex=0.6)
+
+```
+In questo scenario in cui la prior è un po’ più informativa si nota la diversa forma della 
+distribuzione a priori e la traslazione della a posteriori verso destra rispetto alla verosimiglianza.
+
+Il valore atteso adesso è
+```{r}
+(alpha + k)/(n+alpha + beta)
+```
+
+La moda è leggermente superiore a quella osservata per lo scenario 1
+
+```{r}
+(alpha + k -1)/(n + alpha + beta -2)
+```
+
+## Scenario 3:
+Nel caso in cui si suppone una distribuzione a priori *molto informativa* ad esempio con $\alpha=3.26$
+and $\beta = 7.19$ si ha:
+
+```{r}
+alpha <- 3.26
+beta<- 7.19
+# distribuzione a priori
+pval<-seq(0,1,by=0.01)
+plot(pval, dbeta(pval,alpha,beta),
+type = "l", col = "blue", ylim = c(0,6),
+ylab = "Densità", xlab = "theta", main = "Scenario 3")
+# verosimiglianza
+lines(pval, dbeta(pval, k+1, n-k+1),
+lwd = 2,
+col = "darkblue")
+# distribuzione a posteriori
+lines(pval, dbeta(pval, k+alpha, n-k+beta),
+lwd = 1,
+col = "red")
+legend("topleft",
+c("a Priori","Verosimiglianza","a Posteriori"),
+lty=c(1,1,1),
+lwd=c(1,2,1),
+col=c( "blue","darkblue","red" ), cex=0.6)
+
+```
+In questo caso la distribuzione a priori è molto infomativa e pertanto “trascina” verso la sua
+moda la distribuzione a posteriori che è sempre spostata verso la verosimiglianza ma meno
+vicina a quest’ultima rispetto ai due casi precenti.
+La stima puntuale della probabilità di successo in base al valore atteso della distribuzione a
+posteriori è
+```{r}
+(alpha + k)/(n+alpha + beta)
+
+```
+
+Anche la stima in base alla moda è inferiore rispetto a quelle dello scenario 1 e 2
+
+```{r}
+(alpha + k -1)/(n + alpha + beta -2)
+```
+
+Nello scenario considerato la distribuzione a priori è piuttosto informativa ed essendo la
+numerosità campionaria non troppo elevata la distribuzione a posteriori risulta influenzata
+maggiormente dalla distribuzione a priori, il peso della funzione di verosimiglianza è minore.
+
+## Example: Bayes Billiard Balls:

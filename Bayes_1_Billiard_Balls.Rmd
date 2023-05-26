@@ -1,0 +1,82 @@
+---
+title: "Bayes_1_Billiard_Balls"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Billiard Balls:
+
+Si definisce la variabile casuale che identifica il numero di palline blu che si posizionano prima
+della pallina gialla fissando $n=10$
+
+Tramite la simulazione dell’esperimento al calcolatore si verifica la prima espressione
+dell’equazione a pagina 19 delle dispense di teoria dove 𝑘 è il numero dei successi.
+
+Si ripete l’esperimento 100000 contando ogni volta il numero dei successi in base a diversi
+valori della probabilità di successo generati come numeri pseudo-casuali da una distribuzione 
+$Beta(\alpha=1, \beta=1)$.
+
+- Utilizzando una **distribuzione a priori non informativa (uniforme)** si generano
+dei numeri pseudo-casuali
+
+```{r}
+nsim <- 10^5
+set.seed(1234)
+p <- rbeta(nsim, shape1 = 1, shape2 = 1)
+print(paste("the lenght of p is:", length(p)))
+head(p)
+```
+- Utilizzando i valori generati si simulano i valori della **distribuzione marginale**
+sapendo che fissando 𝑛 come numero complessivo delle prove si ha
+
+$$ \int_0^1 x^k(1-x)^{n-k} dx = \frac{k!(n-k)!}{(n+1)!}$$
+l’oggetto pxk contiene il numero di successi ottenuti in ogni esperimento con diversa probabilità di 
+successo $𝑝$. Se fissiamo il seme e generiamo l’esito di un solo esperimento abbiamo
+
+```{r}
+n <- 10
+set.seed(1234)
+pxk <- rbinom(1,n,p)
+head(p)
+head(pxk)
+```
+
+dove il primo elemento pari a 10 indica che nel primo esperimento su 10 prove sono stati
+ottenuti 10 successi con una probabilità di successo è 0.89.
+
+```{r}
+n <- 10
+set.seed(1234)
+pxk <- rbinom(nsim,n,p)
+head(pxk)
+```
+
+Nella seconda simulazione su 10 prove sono stati ottenuti 4 successi con probabilità di successo pari a 0.39.
+
+Nell’esempio la distribuzione marginale di $X$ non dipende da $𝑘$ (numero di successi) infatti
+come dimostrato nelle dispense $P(X=k) = \frac{1}{n+1} = \frac{1}{11} = 0.09090909$.
+
+Disegnando l’istogramma rispetto ai valori realizzati e salvati in pxk si nota che la distribuzione 
+è assimilabile a quella di un’iniforme in (0,10) e che le densità sono proporzionali
+a $\frac{1}{n+1}$
+
+```{r}
+h <- hist(pxk,
+breaks = seq(-0.5,n+0.5,1),
+freq=FALSE,
+ylim = c(0,0.20),
+xlab = "Numero palline blu a sinistra della gialla ",
+ylab= "Densita'",
+main = expression("Distribuzione Marginale")
+)
+```
+
+```{r}
+h$density
+```
+
