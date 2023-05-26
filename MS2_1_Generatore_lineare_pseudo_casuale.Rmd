@@ -1,0 +1,343 @@
+---
+title: "MS2_1_Generatore_lineare_pseudo_casuale"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Generatore linerare di numeri pseudo-causali
+Nel seguito si mostra un esempio che implementa un algoritmo lineare di tipo congruenziale
+misto per la generazione di numeri pseudo-casuali. Si riporta anche la funzione di R nel
+seguito chiamata runif.
+## Metodo congruenziale lineare
+Si utilizza il metodo di generazione congruenziale misto in cui sono presenti le seguenti
+quantità. Si genera una successione di valori in modo deterministico che appare causuale.
+Il generatore ha la seguente struttura:
+$$x_{i+1} =(a.x_i + c) \quad \textrm{mod} \quad m$$
+Lo applichiamo specificando i seguenti valori:
+$$x_{i+1} = [(2^16+1)* 47838 + 5] \quad \textrm{mod} \quad 34359738368$$
+Ovvero:
+- il moltiplicatore e' $a = 2^16 + 1 = 65537$
+- il valore iniziale o seme e' $x_0= 47838$
+- l'incremento e' $c=5$
+- il modulo e' $m = 34359738368$ and $2^{\beta} = 2^{35}$
+
+Risultato
+• Primo numero generato:
+```{r}
+a <- 65537
+m <-34359738368
+xini <- 47838
+c <- 5
+(a*xini + c)%%m
+```
+
+Da cui il primo numero pseudo-casuale si ottiene dividendo per il modulo
+
+```{r}
+x1 <- (a*xini+c)%%m
+x1/m
+```
+Secondo numero: il valore successivo si ottiene da quello ottenuto in precedenza
+```{r}
+(a*x1 + c)%%m
+x2 <- (a*x1+ c)%%m
+x2/m
+```
+
+Il seguente costrutto iterativo permette di generare una sequenza di 1857 numeri
+pseudo-casuali le cui determinazioni vengono salvate nel vettore random.n
+
+```{r}
+n <- 1857
+random.n <- numeric(n)
+for(j in 1:n){
+x1 <- (a*x1+c)%%m
+random.n[j] <- x1/m
+}
+head(random.n)
+tail(random.n)
+```
+
+La funzione set.seed richiede un intero per specificare il seme in R.
+
+## 1. Valutazione della pseudo-casualita' della serie
+### 1.1. Statistiche descrittive:
+```{r}
+require(skimr)
+skim_without_charts(random.n)
+var(random.n)
+```
+
+Gli indici di posizione sono in linea con quelli attesi rispetto alla distribuzione uniforme la
+cui variabile casuale ha un valore atteso è pari a 1/2. La varianza è conforme con quella
+teorica 1/12 = 0.08333.
+
+## 2.Test Grafici:
+### a Diagramma a dispersione
+Il primo test grafico è il diagramma a dispersione sul piano $(1, 𝑛 − 1) ⋅ (2 ∶ 𝑛)$
+
+```{r}
+plot(random.n[1:1856],
+random.n[2:1857],
+main="Grafico (1,n-1)*(2,n)",
+ylab = "valori generati con metodo congruenziale")
+```
+
+Si nota che i punti sono in sequenza e non sono sparsi nel piano in modo casuale come
+dovrebbero essere se fossero osservazioni indipendeti. Se ci fosse indipendenza ogni coppia
+di punti $(u_i, u_{i+1})$ dovrebbe essere disposta con uguale probabilità sul piano. Il grafico
+evidenzia che il generatore non è adeguato.
+Si verifichi che basta semplicemente aumentare il valore assegnato al termine 𝑐 (incremento),
+ad esempio ponendo 𝑐=235 perchè la serie non presenti più questo andamento nel grafico a
+dipesesione.
+
+### b) Istogramma:
+
+L’istogramma permette di valutare la densità di frequenza per ogni classe di valori.
+Nel seguito si disegna l’istogramma fissando 20 classi e si aggiunge il valore medio osservato
+oltre al testo nel grafico.
+
+```{r}
+hist(random.n, col = 'purple',
+breaks = 20,
+freq=FALSE,
+ylim =c(0,1.5),
+main='Istogramma',
+xlab='numeri pseudo-casuali',
+ylab='Densità di frequenza')
+abline(v=mean(random.n),
+col='purple',
+lwd=2,lty=2)
+text(0.7,1.3,
+c("valore medio"),
+col="blue")
+
+```
+
+Si nota che le densità di frequenza sono approssimativamente simili ed intorno al valore 1.
+Il grafico è simile a quello atteso sotto l’ipotesi di uniforme distribuzione [0, 1].
+
+### c) Funzione di ripartizione empirica:
+Il test grafico seguente permette di confrontare la funzione di ripartizione empirica e
+quella teorica ottenuta con la funzione nativa di R.
+Nel seguente chunk prima si disegna la distribuzione empirica e poi si aggiunge quella teorica
+ed infine si aggiunge la legenda al grafico.
+
+```{r}
+plot(ecdf(random.n),
+do.points=FALSE,
+main ='Funzione di ripartizione empirica vs teorica')
+curve(punif(x,0,1),
+lty='dashed',
+col='red',
+lwd='3',
+add=TRUE)
+legend(0.8,0.4,
+col=c("black","red"),
+c("f.r. empirica","f.r. teorica"),
+lty=c(1,2),
+cex=0.7)
+```
+Non si notano particolari differenze tra le due funzioni di ripartizione poste a confronto.
+
+## Test di Kolmogorov-Smirnov
+
+Il test non parametrico che permette di confrontare la funzione di ripartizione empirica con
+quella teorica della distribuzione uniforme si effettua con la funzione ks.test.
+Dalle dispense della teoria ricordiamo che la statistica test si basa sulla massima differenza
+in modulo tra le due funzioni di ripartizione.
+Sotto l’ipotesi nulla che le due funzioni di ripartizione siano uguali si utilizza la distribuzione
+asintotica (n grande) della statistica test (Birnbaum & Tingey, 1951).
+
+```{r}
+ks.test(random.n, "punif")
+```
+
+Il valore osservato della statistica test è 0.009 e l’area definita è prossima a 1. Il livello
+di significatività osservato p-value è superiore a 0.1.,0.05, 0.01 pertanto il test induce ad
+accettare l’ipotesi nulla che i dati siano realizzazioni dalla variabile casuale uniforme in [0, 1].
+### Test Chi Quadrato
+Per eseguire questo test si calcola la frequenza relativa dei valori osservati per ogniuno dei
+sottointervalli
+
+```{r}
+n <- length(random.n)
+int<-seq(0,1,by=0.1); int
+foss<-table(cut(random.n, int))/n; foss
+```
+Le frequenze osservate vengono confrontate con quelle attese in base all’ipotesi che le determinazioni
+siano generate dalla distribuzione uniforme
+```{r}
+p<- rep(0.1,10); p
+```
+
+La funzione chisq.test permette di effettuare il test nel modo seguente
+
+```{r}
+chisq.test(foss,p=p)
+```
+
+Il $𝑝 − 𝑣𝑎𝑙𝑢𝑒$ è prossimo a 1.
+
+Il valore critico della statistica test se l’ipotesi nulla è vera si determina fissando un valore
+per l’errore di primo tipo ad esempio $\alpha = 0.05$ nel modo seguente
+
+```{r}
+qchisq(0.95,df=9)
+```
+
+Essendo il valore critico del test pari a 17 questo risulta molto maggiore del valore ossevato
+(0.0011) ed il test non permette di rifiutare l’ipotesi nulla per ogni livello di significatività.
+
+Pertanto anche in base a questo test le determinazioni sono assimilabili a quelle di una
+distribuzione uniforme in [0, 1].
+
+Occorre eseguire il test per altre (molte) serie di numeri generate con il generatore congruenziale
+precedente (cambiando il seme) per valutare accuratemente la qualità del generatore.
+
+Si noti che nelle situazioni reali in cui si considerano i dati campionari il test deve essere svolto
+utilizzando le frequenze assolute e non le frequenze relative perchè altrimenti le conclusioni
+possono essere errate dipendendo dalla numerosità campionaria.
+
+Nel presente contesto occorre simulare un’ampia serie di numeri pseudo casuali per cui è
+comunque possibile utilizzare le frequenze relative.
+Con le frequenze assolute il test è il seguente
+
+```{r}
+n <- length(random.n)
+int<-seq(0,1,by=0.1); int
+
+fossN<-table(cut(random.n, int)); fossN
+
+chisq.test(fossN)
+```
+### Funzione di autocorrelazione empirica
+La rappresentazione grafica della funzione di autocorrelazione empirica viene chiamata
+correlogramma. In R si disegna con la funzione acf dove il ritardo di default è pari a
+$10 ⋅ log(𝑛)$
+
+```{r}
+acf(random.n,
+main = " funzione di autocorrelazione")
+```
+Il grafico si utilizza per le serie storiche in quanto i dati sono generati a istanti successivi.
+Il grafico mostra il valore della correlazione determinato tra due valori della serie con 𝑘 = 𝑙𝑎𝑔:
+i valori sono correlati: serial dependence. Al crescere al crescere della lunghezza dell’intervallo
+ci si aspetta che la correlazione tra $X_t$ e $X_{t_h}$ diminuisca. Il modo in cui la funzione di
+autocorrelazione tende a zero viene considerato come una misura di memoria del processo
+Nel primo grafico si notano dei valori che si discostano da quelli attesi.
+
+```{r}
+n<-length(random.n)
+acf(random.n, main = " funzione di autocorrelazione", lag.max =n)
+```
+Anche nel grafico con ritardo pari a 1 le osservazioni sono dipendenti. Infatti a livello
+antitotico vale la seguente distribuzione
+$$ \hat{\rho} \thicksim N(0, 1/n)$$
+Si notano alcuni valori superiori ai valori soglia (linee tratteggiate) in base all’ipotesi di
+processo stazionario sottostante.
+
+Questo grafico suggerisce che le determinazioni non sono indipendenti come già notato nel
+grafico dei punti posti sul piano cartesiano.
+
+## Funzione runif
+Nel seguito si utilizza il generatore di R che si richiama con la funzione runif e si ripetono i
+test effettuati in precedenza su questa nuova serie di realizzazioni di numeri pseudo-casuali.
+Si noti che la funzione set.seed definisce il valore iniziale e permette di poter generare
+sempre gli stessi valori.
+
+```{r}
+set.seed(3882)
+n <- 2000
+rand <- runif(n, min=0, max=1)
+head(rand)
+```
+### a) diagramma a dispersione
+```{r}
+plot(rand[1:(n-1)],
+rand[2:n],
+main="Grafico (1,n-1)*(2:n)",
+ylab = "valori generati con funzione runif")
+```
+
+Si nota che i punti sono sparsi nel piano in modo casuale.
+### b) Funzione di ripartizione empirica
+```{r}
+plot(ecdf(rand),
+do.points=FALSE,
+main ='funzione di ripartizione empirica vs teorica')
+curve(punif(x,0,1),
+lty='dashed',
+col='red',
+lwd='3',
+add=TRUE)
+legend(0.6,0.3,col=c("black","red"),
+c("f.r. empirica","f.r. teorica"),
+lty=c(1,2),
+cex=0.6)
+```
+
+Non si notano particolari differenze tra le due funzioni di ripartizione.
+### c) Istogramma
+```{r}
+hist(rand, col = 'yellow',
+breaks = 20,
+freq=FALSE,
+ylim =c(0,1.5),
+main='Istogramma',
+xlab='numeri pseudo-casuali (runif)',
+ylab='Densità di frequenza')
+abline(v=mean(random.n),
+col='purple',
+lwd=2,lty=2)
+text(0.7,1.3,
+c("valore medio"),
+col="blue")
+```
+
+La densità appare quasi uniforme.
+Rispetto ai grafici riferiti alla serie di numeri ottenuti con il metodo congruenziale questi
+ultimi conducono ad accettare l’ipotesi che le determinazioni provengano da una distribuzione
+uniforme.
+Anche i test statistici confermano quest’affermazione.
+
+## Test statistici
+
+### Kolmogorov-Smirnov
+```{r}
+ks.test(rand, "punif")
+```
+       
+### Chi Quadrato
+```{r}
+foss<-table(cut(rand, int))/n; foss
+
+chisq.test(foss,p=p)
+```
+
+### Autocorrelazione
+```{r}
+acf(rand,
+main = " funzione di autocorrelazione")
+```
+
+```{r}
+acf(rand, lag.max = n,
+main = " funzione di autocorrelazione")
+```
+
+
+
+
+
+
+
+
+
+
+
