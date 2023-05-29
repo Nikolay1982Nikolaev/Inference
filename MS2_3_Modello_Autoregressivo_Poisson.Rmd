@@ -1,0 +1,386 @@
+---
+title: "Modello autoregressivo di Poisson"
+author: "NikolayNikolaev"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Modello autoregressivo di Poisson non omogeneo
+
+## Analisi della serie storica dei conteggi riferiti a COVID-19
+
+Nel presente esempio (tratto da Bartolucci e Pennoni, 2020) si stima un modello di Poisson
+non omogeneo nel tempo considerando la serie dei conteggi dei casi di pazienti affetti da
+COVID-19.
+I dati sono quelli forniti giornalmente a livello ufficiale dal Dipartimento della Protezione
+Civile sull’andamento del COVID-19 in Italia.
+La serie inizia con i conteggi del giorno 24 Febbraio 2020 (primo giorno di rilevazione) e
+viene incrementata ogni giorno.
+Nel seguente esempio si considerano i dati riferiti al periodo temporale più recente dal 1
+Agosto fino al 20 Ottobre 2022.
+In particolare si seleziona la serie storica dei conteggi di interesse e si stima il modello di
+Poisson non omogeneo con un trend temporale lineare, quadratico e log lineare inserendo anche
+una componente autoregressiva del primo ordine (si vedano le dispense di teoria) espresso
+come segue:
+
+$$\log{\lambda_t(y_{(t-1)})}=\beta_0 +t.\beta_1 + (\frac{t^2}{100}).\beta_2 + \log{(t)}.\beta_3 + z_{(t-1)}.\rho  $$
+
+- dove$\tho$ e' il coefficiente autoregressivo.
+
+I dati sono di libero accesso nella piattaforma GITHUB e con la seguente sintassi si importano
+nel workspace direttamente dal repository e si selezionano alcune delle categorie disponibili.
+Si noti che con il seguente chunck prima si importa il dataframe con i conteggi di tutte le
+date disponibili fino al giorno corrente e poi con la funzione subset si seleziona il perido di
+interesse.
+```{r}
+repository <- "https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/"
+overall.dataset <- "dati-andamento-nazionale/dpc-covid19-ita-andamento-nazionale.csv"
+overall.filename<-paste(repository,overall.dataset,sep="")
+Italy<-read.csv(overall.filename)
+
+names(Italy)
+
+library(dplyr)
+
+dataItaly<- Italy %>%
+select(data,
+dimessi_guariti,
+isolamento_domiciliare,
+ricoverati_con_sintomi,
+terapia_intensiva,deceduti)
+mydate <- as.Date(as.POSIXct(dataItaly$data, format="%Y-%m-%dT %H:%M:%S"))
+df <-data.frame(mydate,dataItaly$isolamento_domiciliare)
+colnames(df)<-c("date", "Isolati")
+df1 <- subset(df, date >= as.Date('2022-08-01') & date <= as.Date('2022-10-20'))
+```
+
+Si nota che vi sono 24 campi disponibili per i dati nazionali.
+Il dataframe denominato df è stato creato considerando solo la data e la serie dei conteggi
+che si intende usare: ovvero ad esempio i pazienti posti in isolamento domiciliare.
+Si vede che i giorni di rilevazione vanno dal 24 febbraio al 20 ottobre 2020
+```{r}
+min(df$date)
+max(df$date)
+```
+Il data frame df1 invece considera l’ultimo periodo.
+L’utilizzo del modelli di Poisson permette anche di tenere conto in modo adeguato delle irregolarità
+presenti nei dati, e pertanto i valori interpolati creano una sorta di effetto smoothing
+o lisciamento ai dati osservati.
+
+```{r}
+require(skimr)
+skimr::skim_without_charts(df1$Isolati)
+```
+
+Si rappresenta graficamente la serie osservata
+
+```{r}
+n<-length(df1$Isolati)
+ma<-max(df1$Isolati)
+mi<-min(df1$Isolati)
+ytick<-c(mi,409247,ma)
+xtick<-c(1,11, 21, 31, 41, 51, 61, 71, 81)
+plot(df1$Isolati,
+     ylab=expression("Isolamento ("*italic(y[t])*")"),
+     xlab=expression("Giorni ("*italic(t)*")"),
+     yaxt="n",
+     xaxt="n",
+     xlim =c(1,n+5),
+     ylim = c(0,ma+10),
+     lwd = 0.5,
+     lty = 1,
+     col ="black" )
+axis(side=2, 
+     at=ytick, 
+     labels = FALSE,
+     cex.lab = 0.5, 
+     padj = 2,
+     tck=-0.009)
+text(par("usr")[1], 
+     ytick,
+     labels = ytick, 
+     srt = 45,
+     pos = 2, 
+     xpd = TRUE, 
+     cex.lab = 0.1)
+axis(side=1, 
+     at=xtick,
+     labels = FALSE, 
+     cex=0.1,
+     tck=-0.009)
+text(x=xtick,
+     par("usr")[3],
+     labels = xtick,
+     cex.lab = 0.5,
+     pos = 1, 
+     xpd = TRUE)
+```
+
+Il modello di Poisson non omogeneo si stima definendo le covariate riferite al tempo e
+menzionate in precedenza: il trend lineare, quadratico e log-lineare nel modo seguente
+
+```{r}
+regressors1Italy <- cbind(linearTrend=seq(along=df1$Isolati),
+                          quadTrend = seq(along=df1$Isolati)^2/100,
+                          linlogTrend = log(seq(along=df1$Isolati)))
+head(regressors1Italy)
+```
+Per stimare il modello con il metodo della massima versosimiglianza si utilizza la funzione
+tscount::tsglm della libreria (da installare, tscount proposta da Liboschik et al., 2020)
+(Analysis of Count Time Series)
+
+Si noti che la prima opzione del chunk seguente serve per rimuovere la notazione scientifica
+che alcune volte può essere stampata in output.
+```{r}
+options(scipen = 100)
+require(tscount)
+M3Italy <- tsglm(ts=df1$Isolati,
+  link = "log",
+  model=list(past_obs=1),
+  xreg=regressors1Italy,
+  distr = "poisson")
+```
+Come già sperimentato per la funzione glm occorre fornire:
+- i dati osservati come serie univariata dei conteggi,
+- la funzione link per il modello log-lineare per 𝜆𝑡,
+- definire l’ordine del ritardi con past_obs,
+- la matrice delle covariate temporali xreg e la distribuzione di riferimento.
+
+```{r}
+summary(M3Italy)
+```
+Viene fornito in output il valore massimo della funzione di log-verosimiglianza a convergenza,
+il numero dei parametri stimati con il modello, ed i valori degli indici di selezione BIC (criterio
+d’informazione Bayesiano), AIC (criterio di Akaike) e una sua versione aggiustata definita
+QIC (quasi information criterion).
+
+Dalla sintesi dei risultati delle stime del modello notiamo che l’intercetta del modello ha un
+valore positivo e corrisponde al valore del logaritmo di lambda quando tutte le covariate
+hanno valore 0.
+
+Le stime dei coefficienti di regressione sono fornite insieme all’intervallo di confidenza
+calcolato al livello del 95% utilizzando il metodo asintotico (basato sull’approssimazione
+dello stimatore alla distribuzione Normale).
+
+Si noti che tutti i coefficienti sono positivi tranne i due coefficienti riferito al trend quadratico
+e al trend log-lineare nel tempo.
+
+Si noti che è di particolare interesse confrontare i valori osservati con i valori interpolati.
+E’ inoltre di interesse fare delle previsioni: calcolare i conteggi attesi in base al modello
+stimato per gli isolati di oggi (20 ottobre 2022) e per quelli dei prossimi 4/5 giorni.
+
+Come per la funzione glm i valori previsti si ottengono con la funzione predict.
+
+Si noti che la funzione tsglm::predict implementa il method="bootstrap" ovvero la distribuzione
+dei valori previsti è approssimata con il bootstrap parametrico basato di default
+su B = 1000 traiettorie simulate dal modello stimato. Si noti che in questo modo si associa
+alla stima puntuale della previsione un intervallo definito intervallo predittivo calcolato con
+una confidenza di 0.95.
+
+```{r}
+go <- 5
+TT <- length(df1$date)
+P3Italy <-predict(M3Italy,
+                  newxreg = data.frame(linearTrend = ((TT+1):(TT+go)),
+                                       quadTrend = ((TT+1):(TT+go))^2/100,
+                                       linlogTrend = log((TT+1):(TT+go))),
+                  n.ahead=go,
+                  method="bootstrap" )
+```
+La seguente tabella riporta i valori previsti degli isolati, insieme ai limiti dell’intervallo
+predittivo al 95%, per oggi e per i prossimi 4 giorni
+```{r}
+pred<-data.frame(cbind(P3Italy$pred,P3Italy$interval))
+colnames(pred)<-c("previsti", "PIinf", "PIsup")
+pred
+```
+Si nota che il numero degli isolati atteso per domani è di 514103 ed il trend è quello che iil
+numero decresca nei giorni successivi.
+
+Si nota che le ampiezze degli intervalli sono modeste e che queste crescono al crescere del
+giorno previsto. Ciò denota, come ci si aspetta, un aumento dell’incertezza delle previsioni
+via via che ci si allontana dall’ultima data di osservazione.
+
+Le seguente figura mostra i conteggi osservati dei pazienti isolati per tutto il periodo considerato
+insieme ai valori interpolati con il modello stimato a cui vengono aggiunti i valori
+previsti per il periodo temporale riportato che sono visualizzati dopo la retta grigia che
+indica il giorno di ieri
+
+```{r}
+ytick<-c(mi,409247,ma)
+xtick<-c(1,11, 21, 31, 41, 51, 61, 71, 81)
+plot(df1$Isolati,
+     ylab=expression("Isolamento ("*italic(y[t])*")"),
+     xlab=expression("Giorni ("*italic(t)*")"),
+     yaxt="n",
+     xaxt="n",
+     xlim =c(1,n+5),
+     ylim = c(0,ma),
+     lwd = 0.5,
+     lty = 1,
+     col ="black" )
+abline(v=240, col = "gray")
+axis(side=2, 
+     at=ytick, 
+     labels = FALSE,
+     cex.lab = 0.5, 
+     padj = 2,
+     tck=-0.009)
+text(par("usr")[1],
+     ytick,
+     labels = ytick, 
+     srt = 45,
+     pos = 2, 
+     xpd = TRUE, 
+     cex.lab = 0.1)
+axis(side=1, 
+     at=xtick,
+     labels = FALSE, 
+     cex=0.1,
+     tck=-0.009)
+text(x=xtick,
+     par("usr")[3],
+     labels = xtick,
+     cex.lab = 0.5,
+     pos = 1, 
+     xpd = TRUE)
+lines(c(M3Italy$fitted.values,
+     pred$previsti),
+     lwd=3, 
+     col = 3, 
+     lty = 4)
+legend("bottomleft",
+       pch = c(20,NA,NA,NA,NA),
+       lty = c(NA,2),
+       legend = c("osservati", "interpolati e previsti"),
+       col = c("black", "green"),
+       bty = "n",
+       x.intersp = 0.1,
+       cex= 0.6, 
+       pt.cex = .5,
+       xpd = TRUE,
+       text.width = 0.0001)
+       
+```
+
+## Modello autoregressivo con distribuzione Binomiale Negativa
+Nel presente esempio si consida un modello basato sulla distribuzione Binomiale Negativa
+per la serie dei conteggi dei casi di pazienti affetti da COVID-19.
+Nell’ applicazione precedente la stima del parametro autoregressivo è diversa da zero $\hat{\rho}=0.99$ beta1.
+
+Il modello basato sulla distribuzione Binomiale Negativa include il parametro di overdispersion
+in modo che la il valore atteso dei conteggi è $\lambda_t$ mentra la varianza e' diversa dal valore atteso
+e risulta $\hat{\lambda}.(1+\hat{\lambda}.\hat{\sigma^2})$
+```{r}
+options(scipen = 100)
+require(tscount)
+M4Italy <- tsglm(ts=df1$Isolati,
+                 link = "log",
+                 model=list(past_obs=1),
+                 xreg=regressors1Italy,
+                 distr = "nbinom")
+```
+
+ovvero specificando la distribuzione Binomiale Negativa con distr = "nbinom".
+In questo caso il modello presenta un parametro aggiuntivo riferito a $\sigma^2$
+```{r}
+summary(M4Italy)
+```
+
+Dalla sintesi dei risultati del modello notiamo che la stima del parametro $\sigma^2$ è 0.00375 che
+risulta pertanto postiva indicando overdispersion.
+Per calcolare l’errore standard occorre applicare il bootstrap che verrà introdotto nei giorni
+seguenti.
+
+I valori previsti per i cinque giorni successivi (dal 19 al 23 ottobre) con questo modello si
+ottengono con la funzione predict ed in modo analogo a quanto mostrato per il modello
+stimato con la distribuzione di Poisson possiamo calcolarle dopo aver specificato le covariate
+temporali.
+
+```{r}
+go <- 5
+TT <- length(df1$date)
+P4Italy <-predict(M4Italy,
+newxreg = data.frame(linearTrend = ((TT+1):(TT+go)),
+quadTrend = ((TT+1):(TT+go))^2/100,
+linlogTrend = log((TT+1):(TT+go))),
+n.ahead=go,
+method="bootstrap" )
+pred<-cbind(P4Italy$pred,P4Italy$interval)
+colnames(pred)<-c("previsti", "PIinf", "PIsup")
+pred
+```
+
+E’ interessante notare che il valore puntuale del conteggio previsto è simile a quello ottenuto
+con il modello di Poisson tuttavia in base all’overdispersion l’itervallo predittivo calcolato
+con una fiducia di 0.95 ha maggiore ampiezza.
+I conteggi osservati dei pazienti isolati per tutto il periodo considerato insieme ai valori
+interpolati con il modello stimato e i valori previsti possono essere rappresentati graficamente
+
+```{r}
+plot(df1$Isolati, 
+     lwd = 0.5,
+     lty = 1,
+     col ="black",
+     xlab = "Giorni",
+     ylab= "Conteggio Isolati",
+     ylim = c(mi,ma+2), 
+     xlim = c(0,n+5))
+     abline(v=81, 
+     col = "gray")
+lines(c(M4Italy$fitted.values, P4Italy$pred),
+     lwd=2, 
+     col = 2, 
+     lty = 2)
+     legend("bottomleft",
+            lty = c(1,2),
+            legend = c("osservati", "interpolati e previsti"),
+            col = c("black", "red"),
+     bty = "n",
+     x.intersp = 0.1,
+     cex= 0.6, 
+     pt.cex = .5,
+     xpd = TRUE,
+     text.width = 0.0001)
+```
+## Valutazione della prevalenza nel tempo
+Considerando la popolazione complessiva è possibile stimare in base al modello la prevalenza
+che misura la proporzione dell’evento (Isolamento nel presente caso) in una popolazione in
+un dato momento.
+
+Per l’Italia la numerorità della popolazione totale è reperibile dal sito dell’Istituto Nazionale
+di Statistica che riporta che popolazione residente al 1 Gennario 2020 è di 60317000 unità
+https://www.istat.it/it/archivio/238447
+
+Utilizzando quest’informazione è possibile calcolare la prevalenza dividendo i valori per
+questo numero (e moltiplicando per mille)
+
+```{r}
+prev<-c(M4Italy$fitted.values,P4Italy$pred)/60317000
+prev<-prev*1000
+```
+
+E verificare in base al modello stimato come questa si è modificata nel tempo ad esempio
+con il seguente grafico
+
+```{r}
+plot(prev, type = "l",
+     xlab = "Giorni",
+     ylim = c(0,20),
+     lwd=2,
+     col = "blue", 
+     ylab = "(prevalenza isolati)*1000")
+```
+
+che permette di evidenziare la prevalenza di casi ogni 1000 abitanti. In questo modo è
+possibile anche fare confronti tra diversi paesi.
+
+
+
+
+

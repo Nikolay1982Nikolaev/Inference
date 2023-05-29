@@ -1,0 +1,38 @@
+---
+title: "Modello coniugato Multinomiale"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Modello coniugato Multinomiale
+
+Si considera un campione di 𝑛 = 1447 adulti sui quali sono stati trovati dei melanomi:
+$y_1 = 727$ a diffusione superficiale, $y_2=583$ nodulare e $y_3=137$ lentigginoso. I conteggi sono assunti con distribuzione
+multinomilae con ripsettive probabilita $p=(p_1,p_2, p_3)$
+
+Si suppone di essere interessati alle proporzioni riferite al melanoma a diffusione superficiale
+rispetto a quello nodulare. Si è interessati pertanto alla differenza $p_1-p_2$
+
+Considerando il modello coniugato la distribuzione a posteriori è una distribuzione di Dirichlet.
+Se a priori si assume una distribuzione non informativa allora
+$$f(p) =Dir(1+y)$$
+
+Ultizzando la funzione rdirichlet della libreria LearnBayes si simulano 1000 realizzazioni
+da questa distribuzione di Dirichlet
+```{r}
+require(LearnBayes)
+n <- c(728, 584, 138)
+p <- rdirichlet(1000, n)
+```
+
+La prima colonna contiene 1000 valori plausibili per le probabilità riferite al melanoma
+superficiale. Dato che si è interessati alla differenza si calcola
+```{r}
+hist(p[,1] - p[,2], main="", breaks=100)
+```
+che mostra che la proporzione del melanoma supeficiale è sempre maggiore di quella del
+melanoma nodulare.

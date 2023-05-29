@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Generatore linerare di numeri pseudo-causali
+
 Nel seguito si mostra un esempio che implementa un algoritmo lineare di tipo congruenziale
 misto per la generazione di numeri pseudo-casuali. Si riporta anche la funzione di R nel
 seguito chiamata runif.

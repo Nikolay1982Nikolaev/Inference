@@ -1,0 +1,132 @@
+---
+title: "Regione_di_credibilita"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Regione di credibilità
+Nel seguito si illustra il calcolo delle regioni di credibilità sulla distribuzione a posteriori
+per il modello coniugato Beta-Binomiale. In questo modo si fornisce anche una misura di
+incertezza per la stima del parametro. L’intervallo centrale è formato dall’insieme di valori
+nel quale si trova il $100(\lambda /2)$%$ della distribuzione a posteriori.
+
+Quando la regione di credibilita viene determinata considerando intervalli entrali fissando $\alpha=0.05$ l'intervallo ha come estremi i quantili di ordine
+$1-\alpha /2$ and $\alpha/2$ della distribuzione a posteriori
+
+##Esempio 1:
+Si supponga di osservare delle realizzazioni in 10 unità campionarie assunte come determinazioni
+indipendenti da una variabile casuale di Bernoulli. Si contano in totale due successi.
+Assumendo il modello Beta-Binomiale e una distribuzione a priori non informativa per la
+probabilità di successo $p=Beta(1,1)$, la distribuzione e' uniforme e pertanto la distribuzione a posteriori e' la seguente
+$p(\theta|x) = Beta(1+2, 1+8)$
+
+L'intervallo di credibilita centrale al livello di credebilita del %95%$ si determina considerando i quantili.
+
+```{r}
+alpha<-beta <-1
+n <- 10
+k <- 2
+curve(dbeta(x, alpha+k, n-k+beta), xlab = "p")
+ci <- qbeta(c(0.025, 0.975), alpha+k, n-k+beta)
+abline(v = ci, lty=2)
+legend("topright",
+       "intervallo centrale",
+       lty = 2,
+       bty = "n",
+       cex = 0.7)
+```
+Gli estremi dell’intervallo di credibilità al 95% sono i seguenti
+$$[0.06, 0.52]$$
+
+Si nota che l’intervallo è particolarmente ampio e pertanto l’accuratezza della stima non è
+elevata.
+
+
+## Esempio 2:
+Nel seguito si utilizza l’esempio illustrato in precedenza circa il numero di ipertesi dove sono
+state definite diverse distribuzioni a priori Beta.
+
+Prima si considera una distribuzione a priori poco informativa con
+La distribuzione a posteriori è la seguente $\alpha=0.5$ and $\beta=0.05$. Il campione e' composto 
+da $n=20$ pazienti di cui $k=13$ sono ipertesi. La distribuzione a posteriori ha i seguenti parametri
+$(k+\alpha) =13.5$ and $(n-k+\beta) = 20-13+0.5=7.5$
+```{r}
+ci <- qbeta(c(0.025,0.975),13.5,7.5); ci
+```
+
+Questi estremi definiscono la regione di credibilità al 95% per la proporzione di soggetti
+ipertesi nella popolazione.
+
+La seguente figura mostra la distribuzione a posteriori e l’intervallo di credibilità al 95% per
+il parametro ricavato in precedenza.
+
+```{r}
+curve(dbeta(x,13.5,7.5),
+      ylab=expression(paste(p,"(",p,"|x)")),
+      xlab=expression(p),
+      col ="blue",
+      lwd = 3)
+abline(v=ci,lty=2)
+legend("topleft",
+      "Intervallo centrale",
+      lty=2,
+      bty="n",
+      cex=0.7)
+```
+Si noti che ci sono valori del paramertro al di fuori dell’intervallo basato sul quantile che
+hanno una densità maggiore di alcuni punti all’interno dell’intervallo.
+## Intervallo con la massima densità a posteriori
+Questo intervallo ha la caratteristica come il precedente di contenere sempre il $100(\alpha/2)$%
+della distribuzione a posteriori ed inoltre la densità in questa regione non è mai inferiore di
+quella esterna alla regione.
+Per determinare l’intervallo di credibilità considerando la massima densità a posteriori occorre
+applicare metodi numerici per massimizzare la funzione con il metodo di Lagrange.
+Nel seguito ci si avvale della funzione binom.bayes della libreria binom che implementa il
+metodo e restituisce l’intervallo ed il grafico della densità a posteriori.
+
+```{r}
+require(binom)
+hpd<-binom.bayes(13, 20,
+                 conf.level = 0.95,
+                 type = c("highest"),
+                 prior.shape1 = 0.5,
+                 prior.shape2 = 0.5,
+                 tol = .Machine$double.eps^0.5)
+print(hpd)
+```
+
+Utilizziamo la funzione binom.bayes.densityplot per rappresentare graficamente l’area
+riferita alla massima densità a posteriori
+
+```{r}
+binom.bayes.densityplot(hpd)
+```
+
+## Rappresentazione grafica
+Al grafico delle densità a posteriori si aggiungono gli estremi dell’intervallo di credibilità
+ottenuti con la massima densità a posteriori e con il metodo dei quantili, la media, la moda
+e la mediana
+
+```{r}
+c1<-0.44
+c2 <-0.84
+(13.5-1)/(13.5+7.5-2)
+```
+
+```{r}
+curve(dbeta(x,13.5,7.5),
+      main = "Densità a posteriori", xlab = "p")
+abline(v=ci,lty=2)
+abline(v=0.64, lty = 3, col = "red")
+abline(v=0.6579, lty = 3, col = "lightblue")
+abline(v=c(c1,c2),lty=1, col="pink")
+legend("topleft",
+       c("cred1","media", "moda", "cred2"),
+       lty=c(2,3,3,1), bty="n",cex=0.6,
+       col = c("black","red", "lightblue", "pink"))
+```

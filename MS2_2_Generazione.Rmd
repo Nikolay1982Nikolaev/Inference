@@ -1,0 +1,257 @@
+---
+title: "Generazione di determinazioni da variabili casuali"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Generazione di determinazioni da variabili casuali
+
+Le funzioni implementate in R utilizzano dei suffissi per definire le seguenti quantità:
+- d per calcolare la densità in un punto;
+- p per calcolare la funzione di ripartizione in un punto
+- q per calcolare un quantile
+- r per generare pseudo-determinazioni dalla distribuzione
+
+Le funzioni di :
+-  Exponential: nome exp;
+-  Gamma: nome gamma;
+-  Student t: nome t
+- Normale: nome norm
+
+Per la distribuzione Normale standard nella libreria stats si ha:
+- dnorm
+- pnorm
+- qnorm
+- rnorm
+
+## Generazione di pseudo-derminazioni dalla v.c. di Gauss
+Si generano 10 realizzazioni dalla variabile casuale di Gauss con media zero e varianza 1
+
+```{r}
+rnorm(10, 0, 1)
+```
+
+
+Si generano 1000 realizzazioni e si disegna distribuzione empirica
+
+```{r}
+n <- 1000
+set.seed(27732)
+Z <- rnorm(1000)
+mean(Z); sd(Z)
+hist(Z, 
+     breaks = 30,
+     freq=FALSE,
+     main="Z = N(0,1)",
+     col ="blue",
+     ylab="Densità",
+     ylim =c(0,0.6))
+```
+Per generare 10 realizzazioni da una distribuzione di Gauss tale che $X$ ~ $N(4, 16)$ si puo applicare la trasformazione $(Z. \sigma + \mu)$
+dove $Z$ rappresentano i generati dalla Normale Standard oppure utilizzare la dunzione media e **deviazione standard**.
+```{r}
+rnorm(10,mean = 4, sd = 4 )
+```
+
+
+## Generazione dalla variabile casuale Esponenziale
+
+Nel seguente chuck si crea una griglia di 101 valori e si calcola la densità della v.c. esponenziale
+con $\lambda = 1$ nei puti generati.
+```{r}
+x<-seq(0,5,length=101)
+head(x)
+h<-dexp(x,rate = 1)
+head(h)
+```
+
+La media della v.c. e' 1 e la varianza e' 1.
+Nel seguente grafico si rappresenta la funzione di densita.
+```{r}
+plot(x,h,
+     type="l", 
+     col = "blue",
+     lwd = 3, 
+     ylim = c(0,2),
+     xlab = "Tempo di sopravvivenza", 
+     ylab = "Densità")
+```
+
+Si generano 1000 volte delle realizzazioni da v.c. esponenziali indipendenti con $\lambda=1$
+
+Nel seguente si fissa una numerosità campionaria, si generano 3 realizzazioni dalla v.c. esponenziale
+di riferimento, si calcola la media aritmetica delle tre realizzazioni e si salvano
+nell’oggetto $m$
+```{r}
+n <- 3
+m <- rep(0, 1000)
+for(i in 1:1000){
+  m[i]<-mean(rexp(n, rate=1))
+  }
+head(m)
+```
+Si sovrappone l’istogramma dei valori generati alla curva disegnata in precedenza
+
+```{r}
+plot(x,
+     h,
+     type="l", 
+     col = "blue",
+     lwd = 3, 
+     ylim = c(0,2),
+     xlab = "Tempo di sopravvivenza", 
+     ylab = "Densità")
+hist(m, 
+     prob= T, 
+     add=T, 
+     col = rgb(0,0,1,1/4), 
+     breaks = 25)
+legend(3, 1.5, 
+       c("teorica", "realizzazioni n = 3"),
+       col = c("blue", "lightblue"),
+       lty = c(1,1),
+       lwd = c(2,1),
+       cex = 0.6)
+```
+Per il teorema del limite centrale sappiamo che c’è la covergenza alla distribuzione
+Normale.
+
+
+
+
+## Generazione di pseudo-derminazioni dalla v.c. Beta
+
+La distribuzione $Beta(\alpha, \beta)$ e' definita per valori di $0<x< 1$ e per $\alpha, \beta > 0$
+
+Si generano 1000 osservazioni dalla distribuzione beta standard con $\alpha=1$ and $\beta=1$. Si tratta della distribuzione uniforme in $(0,1)$
+
+```{r}
+n<-1000
+set.seed(27732)
+alpha <- 1
+beta<- 1
+B <- rbeta(n,alpha,beta)
+summary(B)
+```
+Si disegna l’istogramma
+```{r}
+hist(B,
+  breaks = 50,
+  freq=FALSE,
+  main="Beta (1,1)",
+  col ="grey",
+  ylab="Densità"
+)
+curve(dbeta(x,1,1),
+  col = "red",
+  add = TRUE )
+```
+Si nota dalle statistiche descrittive che i numeri possono essere assunte come determinazioni
+pseudo-casuali.
+- si ottengono ancora 1000 realizzazioni ponendo $\alpha=0.5$ and $\beta=0.7$ e si sovrappone la **curva teorica** generata attraverso la funzione **dbeta**.
+
+```{r}
+alpha <- 0.5
+beta  <- 0.7
+B1    <- rbeta(n,alpha,beta)
+#
+hist(B1,
+  breaks = 50,
+  freq=FALSE,
+  main="Beta (0.5,0.7)",
+  col ="grey",
+  ylab="Densità",
+  ylim=c(0,6)
+)
+#
+curve(dbeta(x,alpha,beta),
+    col = "red",
+    add = TRUE, 
+    lwd=2 )
+legend(0.6,4, c("realizzazioni n = 1000", "distr. teorica"),
+    col = c("grey", "red"),
+    lty = c(1,1),
+    lwd = c(1,2),
+    cex = 0.4)
+```
+
+## Generazione di pseudo-derminazioni dalla v.c. Binomiale
+Si genera una sequenza di valori interi da 0 a 12 (𝑛 = 2), si fissa la probabilità di successo
+pari a 0.3 e si determinano le probabilità corrispondenti ai valori di x, si rappresentano
+graficamente
+
+```{r}
+y= seq(0, 12, 1); y
+dy <- dbinom(y,12,0.2); dy
+
+plot(y, dy, type="h")
+```
+Per generare dei numeri dalla distribuzione Binomiale si utilizza **rbinom**. Con il seguente
+codice si genera una realizzazione del risultato di un esperimento un cui la probabilità
+dell’evento successo è 0.2 e si ripete l’esperimento per 8 volte
+```{r}
+set.seed(123)
+rbinom(1, 8, 0.20)
+```
+ovvero su 8 prove si riscontra solo un successo.
+
+Il seguente codice permette di simulare 8 realizzazioni di un esperimento in cui la probabilità
+di successo è sempre 0.2
+```{r}
+rbinom(8, 1, 0.20)
+```
+il risultato è che si verifica un succeso alla terza, quarta e settima prova.
+
+## Generazione di pseudo-derminazioni dalla v.c. di Poisson
+Si genera una sequenza di valori tra 30 e 120 con incremento di 1.
+```{r}
+y = seq(30, 120, 3)
+plot(y, dpois(y, 80), type='h')
+```
+
+Si rappresenta la densità di Poisson fissando la media a 80
+Per generare 100 realizzazioni dalla distribuzione di Poisson con parametro $\lambda=22$ si utilizza.
+```{r}
+set.seed(163)
+y <- rpois(100, 22); y
+mean(y)
+
+var(y)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

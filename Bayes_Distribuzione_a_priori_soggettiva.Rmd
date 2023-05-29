@@ -1,0 +1,89 @@
+---
+title: "Distribuzione_a_priori_soggettiva"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Nel seguito si illustra il metodo di specificazione soggettiva della prior. Si disegnano le
+probabilità tramite istogramma e si calcola la distribuzione a posteriori per la probabilità di
+sviluppare una certa malattia. Si supponga che vengono richieste le opinioni di tre dottori
+sulla quota di persone che possono sviluppare l’osteoporosi. Ogni dottore assegna un valore
+plausibile ai quantili seguenti
+
+```{r}
+p <- seq(0.05, 0.95, by = 0.1); p
+```
+
+Dalle somme dei valori assegnati dai dottori risulano i seguenti valori per la distribuzione a
+priori
+
+```{r}
+prior <- c(1, 5.2, 8, 7.2, 4.6, 2.1, 0.7, 0.1, 0, 0); prior
+```
+
+In base alle opinioni dei dottori è più plausibile che proporzione nella popolazione di riferimento
+sia 0.35.
+
+Si normalizzano i valori precedenti
+```{r}
+prior <- prior/sum(prior); prior
+```
+
+e l’istogramma rappresenta la distribuzione a priori per il parametro
+
+```{r}
+plot(p, prior,
+     ylim = c(0,0.30),
+     type = "h",
+     ylab="Probabilita' a priori",
+     main = " ")
+```
+
+
+## Distribuzione a posteriori
+Se ad esempio è disponibile un campione di 12 pazienti e si osserva che 6 hanno sviluppato
+l’osteoporsi, la funzione pdisc della libreria learnBayes permette di ricavare le le probabilita’
+a posteriori. Questa richiede di speficiare per le osservazioni campionarie i successi (6) e gli
+insuccessi (6) e la distribuzione a priori nel modo seguente
+
+```{r}
+require(LearnBayes)
+data <- c(6, 6)
+post <- pdisc(p,prior, data)
+round(cbind(p, prior, post),3)
+```
+
+La massima probabilita’ a posteriori è $𝑚𝑎𝑥(𝑝) = 0.351$ e corrisponde ad una stima della
+proporzione di malati nella popolazione pari a 0.45.
+La stima di massima verosimiglianza del parametro è invece $\hat{p}= 6/12=0.5$
+
+Utilizzando la libreria lattice e’ possibile confrontare visivamente le due distribuzioni con
+la funzione xyplot che richiede i nomi assegnati alle colonne del dataframe e definiti nel
+modo che segue
+
+```{r}
+library(lattice)
+PRIOR <- data.frame("prior",p,prior)
+POST<- data.frame("posterior",p,post)
+names(PRIOR)<- c("Type","P","Probability")
+names(POST)<- c("Type","P","Probability")
+#
+data<- rbind(PRIOR,POST)
+#
+xyplot(Probability~P|Type,
+       data=data,
+       layout=c(1,2),
+       type="h",
+       lwd=3,
+       col="black")
+```
+
+Si noti che la distribuzione a posteriori è un compromesso tra la prior e la verosimiglianza.
+
+In questo caso la distribuzione a priori è molto informativa.
+

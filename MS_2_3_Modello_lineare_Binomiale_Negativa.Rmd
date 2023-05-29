@@ -1,0 +1,72 @@
+---
+title: "Modello_linear_Binomiale_Negativa"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Modello lineare generalizzato per i conteggi basato sulla distribuzione Binomiale Negativa
+
+Si considerino i seguenti dati riguardanti dei grachi particolari ( per sapere cosa sono si
+rimanda al seguente video https://www.youtube.com/watch?v=6gydJh6rP50). Si tratta
+di 173 femmine di granchi. Durante la stagione della deposizione delle uova, una femmina
+migra verso la riva per riprodursi. Con un maschio attaccato alla sua spina dorsale posteriore,
+si scava nella sabbia e depone grappoli di uova. Le uova sono fecondate esternamente.
+Durante la deposizione delle uova, altri granchi maschi, chiamati satelliti, possono raggrupparsi
+intorno alla coppia e fecondare anche le uova. Per ogni granchio femmina si intende
+modellizzare il numero di satelliti (sat). Le variabili esplicative sono il colore del granchio
+femmina (color 1 = medio chiaro; 2 = medio; 3 = medio scuro; 4 = scuro), la condizione
+della spina dorsale (spine 1 = entrambe buone; 2 = una consumata o rotta; 3 = entrambe
+consumate o rotte), la larghezza del carapace (width in cm) e il peso (weightin kg). Il colore
+è un surrogato dell’età del granchio, poiché i granchi più vecchi tendono ad avere un colore
+più scuro.
+
+Si caricano i dati dal seguente sito
+
+```{r}
+Crabs <- read.table("http://stat4ds.rwth-aachen.de/data/Crabs.dat", header=TRUE)
+head(Crabs)
+```
+
+## Summary statistics:
+```{r}
+require(skimr)
+skimr::skim_without_charts(Crabs)
+```
+Si nota che ben 62 femmine non hanno satelliti e che la media è 2.92 mentre la varianza è
+9.9 per cui molto superiore alla media. Poche (4) hanno un numero di satelliti superiore a
+10.
+
+La distribuzione empirica è la seguente
+```{r}
+table(Crabs$sat)
+```
+```{r}
+hist(Crabs$sat, 
+     breaks=c(0:16)-0.5,
+     ylim = c(0,70),
+     col = "pink", 
+     ylab = "Frequenze",
+     xlab = "Numero satelliti",
+     main = " ")
+```
+Utilizzando la distribuzione BN si stima il seguente modello lineare generalizzato considerando
+come variabili esplicative il peso e il colore.
+
+```{r}
+library(MASS)
+stima <- glm.nb(sat ~ weight + factor(color), 
+                link=log, 
+                data=Crabs)
+summary(stima)
+```
+
+e si nota che il colore non risulta significativo ma solo peso è rilevante. La stima parametro
+di dispersione (forma della distribuzione) è 0.9596 e pertanto l’overdispersion è
+```{r}
+1/0.9596
+```
