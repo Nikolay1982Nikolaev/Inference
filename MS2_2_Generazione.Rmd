@@ -9,6 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Generare delle realizzazioni da variabili casuali signica produrre al calcolatore
+valori che provengono da una determinata distribuzione di probabilita
+(densita) di una variabile casuale discreta, continua, unidimensionale o multidimensionale.
+
+
+
+
 # Generazione di determinazioni da variabili casuali
 
 Le funzioni implementate in R utilizzano dei suffissi per definire le seguenti quantità:
@@ -30,6 +37,48 @@ Per la distribuzione Normale standard nella libreria stats si ha:
 - rnorm
 
 ## Generazione di pseudo-derminazioni dalla v.c. di Gauss
+
+- indicata $X =N(\mu, \sigma^2)$
+- parametri $\mu \in R$ and $\siga \in R^+$
+- particolarmente utile dato che il teorema del limite centrale stabilisce, con relative non troppo stringenti assunzioni, che la somma(convuluzione) di molte variabili casuali indipendenti e identicamnte distribuite, ha una distribuzione normale, indipendentemente della distribuzione delle singole variabii casuali.
+
+Funzione di densita:
+
+$$f(X) = \frac{1}{\sigma.\sqrt{2.\pi}} exp(- \frac{1}{2.\sogma^2} (x-\mu)^2)$$
+
+- $-\infty < x < \infty $
+- $\mu, \sigma > 0, \pi=3.14...$
+
+Proprieta:
+1. sia $Z=N(0,1) => Z.\sigma+\mu=X$
+2. E' sufficente avere un metodo che generi determinazioni dalla distribuzione Normale Standard per ottenere mediante semplice trasformazioni lineare $Z.\simga + \mu = X$, determinazioni da qualunque variabile casuale appartenente alla famiglia $N(\mu, \sigma^2)$
+3. Data n-variabile casuale Normali indipendenti
+$$X_i = N(\mu_i, \sigma_i^2)$$
+- con i =1...n la variabile casuale:
+$$Y = \sum_{i=1}^n X_i$$
+
+ha la sequente distribuzione:
+$$Y=N(\sum_{i=1}^n \mu_i; \sum_{i=1}^n \sigma^2)$$
+Una variabile casuale continua Z assume una distribuzione normale standard se la funzione di densita e':
+
+$$f(x) = \frac{1}{\sqrt{2\pi}} exp(-\frac{1}{2} z^2)$$
+E si scrive: Z = N(0,1)
+
+- $\frac{1}{\sqrt{2\pi}}$ - constante di normalizzazione 
+
+- La funione di ripartizione della variabile casuale normale standard rappresenta l'area sottostante la funzione di densita:
+
+$$\Phi(z) = \int_{-\infty}^z \frac{1}{\sqrt{2\pi}} exp(-\frac{1}{2} t^2) dt$$
+
+si deduce:
+- la simmetria della funzione di densita
+- la simetria dell'area presente sulle code della distribuzione $\Phi(z) = 1-\Phi(-z)$$
+- la simetria di Z and -Z
+
+
+
+
+
 Si generano 10 realizzazioni dalla variabile casuale di Gauss con media zero e varianza 1
 
 ```{r}
@@ -60,6 +109,40 @@ rnorm(10,mean = 4, sd = 4 )
 
 
 ## Generazione dalla variabile casuale Esponenziale
+
+La variabile casuale esponeziale ha una distribuzione flessibile e simmetrica rispetto ai valori postivi del supporto
+
+- eventi temporali
+
+Sia X il tempo di attesa fino al primo evento allora $X=Exp(\lambda)$ quando:
+$$
+c_i =
+\begin{cases} 
+\lambda exp(-\lambda x) & x>= 0 \\ 
+0 & altrove 
+\end{cases}
+$$
+- con $x>=0, \lambda >0$
+- $\frac{1}{\lambda}$ tempo medi  di attesa per l'evento nell uniata di tempo
+
+- quanto piu elevato e' il tasso di occorenza #\lambda$ dell'evento tanto minore sara il tempo di attesa
+
+Funzione di ripartizione:
+$$ p(X=< x) = F_X(x) = \int_0^x e^{-t} dt = -e^{-t} |_0^2 = 1 - e^{-x\lambda}$$
+
+- assenza di memeoria
+- probabilita di aspetare ancora altri s miniti : $P(t+s) = P(s)$ e' ugiale a quella di dover aspettare per s minuti complessivi.
+
+- la somma di n-variabili casuali indipendenti con distribuzione esponenziale e tutti aventi lo stesso parametro $\lambda$ allora varaibile casuale
+$Y = X+_1+X_2...+X_n$ ha una distribuzione Gamma di parametri $(n, \lambda)$
+
+- la statistica d'ordine minimo di una serie di variabili casuali espoenenziali indipendenti $X_{(1)} = min (X_1...X_n)$ con parametri $(\lambda_1,...,\lambda_n)$ ha ancora un distribuzione esponenziale $X_{(1)} = Esp(\sum_i^n \lambda_i)$
+
+
+
+
+
+
 
 Nel seguente chuck si crea una griglia di 101 valori e si calcola la densità della v.c. esponenziale
 con $\lambda = 1$ nei puti generati.
@@ -121,10 +204,54 @@ legend(3, 1.5,
 Per il teorema del limite centrale sappiamo che c’è la covergenza alla distribuzione
 Normale.
 
+#####################################################################################################
+
+## V.c Gamma
+- generalizzazione di esponenzialie
+
+- $\alpha >0$ - di forma
+- $\beta > 0 $ - con $\frac{1}{\beta}$ di scala
+
+$$f(x) = 
+\begin{cases} 
+\frac{\beta^{\alpha}}{\Gamma(\alpha)}.x^{\alpha-1} exp(-\beta x) & x > 0 \\ 
+0 & altrove 
+\end{cases}
+$$
+Funzione Gamma: $|gamma(\alpha) = \int_0^{\infty} x^{\alpha - 1} exp^{-z} dz$ 
+
+Funzione Chiquadrato e un caso speciale di gamma
+
+- modello per fenomeni continui e positivi (illimitati)
 
 
+
+#####################################################################################################
 
 ## Generazione di pseudo-derminazioni dalla v.c. Beta
+
+- $\alpha>0, \beta$
+
+$$f(x) = 
+\begin{cases} 
+\frac{\beta^{\alpha}}{B(\alpha, \beta)}.x^{\alpha-1} (1-x)^{\beta-1} & 0 < x < 1 \\ 
+0 & altrove 
+\end{cases}
+$$
+dove 
+$$B(\alpha, \beta) = \int_0^1 x^{\alpha-1} (1-x)^{\beta-1} = \frac{\Gamma(\alpha) \Gamma(\beta)}{\Gamma(\alpha + \beta)}$$
+
+- fenomeni continui che assumono valori in un intervallo limitato, ricondicibile, mediante opportune trasformazioni all'intervllo (0,1)
+
+- durata respiratoria
+
+
+
+
+
+
+
+
 
 La distribuzione $Beta(\alpha, \beta)$ e' definita per valori di $0<x< 1$ e per $\alpha, \beta > 0$
 
@@ -180,7 +307,56 @@ legend(0.6,4, c("realizzazioni n = 1000", "distr. teorica"),
     cex = 0.4)
 ```
 
+
+## V.c Bernoulli:
+
+- casuale discrete
+- fenomeni dicotomici (0,1)
+- $p \in (0,1)$
+
+$$f(x) = P(X=x)=
+\begin{cases} 
+p^x (1-p)^{1-x} & x= 0,1 \\ 
+0 & altrove 
+\end{cases}
+$$
+- indicato con $U$ - la variabile casuale Uniforme(0,1) :$P(0<U<p) = p = P(X=1) and P(p<U<1) = 1-p = P(X=0)
+
+
+
 ## Generazione di pseudo-derminazioni dalla v.c. Binomiale
+
+- modellare il numero di successi su $n$ prove indipendenti, cisacuna con probabilita di successo costantemente pari a $p$
+
+- parametri $n \in N$ and $p \in (0,1)$ 
+
+Funzione di probabilita:
+
+
+$$f(x) = P(X=x)=
+\begin{cases} 
+\binom{n}{x} p^x (1-p)^{n-x} & x= 0,1 ..n\\ 
+0 & altrove 
+\end{cases}
+$$
+
+Infatti con n-prove indipendenti la proabibilita di una certa sequenza e' l'intersezione di n-eventi indipendenti e pertanto ad essempio la sequenza seguente $(1,1,0,0...0)$ ha la seguente probabilita:
+$$P(X_1=1) P(X_2=1)P(X_3=0) ...P(X_n=0) = p^2(1-p)^{n-2}$$
+
+Si nota che la proabilita e' la stessaindipendentemente dal momento in cui si verficano i due successi e pertanti si scrive:
+
+$$P(X=2) = \binom{n}{2} P^2(1-p)^{n-2}$$
+
+
+Ad esempio, si utilizza per modellizzare la proporzione di soggetti con una
+certa malattia quando la numerosita della popolazione e ampia (N >5000).
+
+
+
+
+
+
+
 Si genera una sequenza di valori interi da 0 a 12 (𝑛 = 2), si fissa la probabilità di successo
 pari a 0.3 e si determinano le probabilità corrispondenti ai valori di x, si rappresentano
 graficamente
@@ -207,7 +383,71 @@ rbinom(8, 1, 0.20)
 ```
 il risultato è che si verifica un succeso alla terza, quarta e settima prova.
 
+
+
+
+
+
+
+
+
 ## Generazione di pseudo-derminazioni dalla v.c. di Poisson
+Per una variabile
+casuale discreta, assume un'innita numerabile di valori. Viene utilizzata per
+modellizzare dei conteggi di occorrenze di eventi che avvengono casualmente
+nel tempo se:
+• i conteggi degli eventi che avvengono in periodi dierenti sono indipendenti;
+• risulta impossibile che due eventi si verichino simultaneamente;
+• il tasso di occorrenza degli eventi risulta costante.
+
+- parametro $\lambda >0$ costente, in questo cso la distribuzione e' detta omogenea.
+
+- fenomeni che si presentano casualmente nello spazio o nel tempo sotto le seguenti condizioni:
+1. i conteggi degli eventi che avvengono
+in periodi disgiunti sono indipendenti
+2. e impossibile che due o piu eventi si
+realizzino simultaneamente
+3. tasso di occorrenza e costante
+
+Questa distribuzione e legata alla cosiddetta legge degli eventi rari per alcune
+ragioni probabilistiche,
+
+La somma di variabili casuali esponenziali indipendenti con stesso tasso $\lambda$ origina un processo Poisson di omogeneo a tasso $\lambda>0$.
+
+Se X rappresenta il numero di eventi che accadono in un intervallo di tempo oppure in una distanza unitaria sotto l'ipotessi che gli eventi siano indipendenti, la probabilita
+di osservare un certo numero di eventi nell'intervallo di tempo dipende solo
+dalla lunghezza dell'intervallo e non da dove inizia l'intervallo di tempo, e $\lambda$
+rappresenta il numero medio di eventi nell'intervallo di lunghezza uniaria.
+
+
+$$f(x) = P(X=x)=
+\begin{cases} 
+\frac{\lambda^x}{x!} exp(-\lambda) & x= 0,1 ..n\\ 
+0 & altrove 
+\end{cases}
+$$
+
+modello- il numero di nascite naturali
+che avvengono un grande ospedale. Si applica anche come approssimazione
+della distribuzione binomiale quando n e grande e p piuttosto piccolo, con $\mu=n.p$
+
+- $E[X] = Var[X] = \lambda$
+
+Pertanto al crescere della media cresce
+anche la variabilita della variabile casuale.
+
+Ad esempio nell'analisi di Y numero di deceduti al giorno in incidenti
+automobilistici in Italia, la probabilita p di questo evento in un giorno
+varia in base alle capacita delle persone che si mettono alla guida ed in base
+al numero di ore spese in automobile. Per cui la distribuzione eettiva della
+variabile casuale che costituisce il meccanismo generatore dei dati avra sicuramente
+maggiore variabilita della variabile casuale di Poisson. Questo fatto
+e detto overdispersion.
+
+
+
+
+
 Si genera una sequenza di valori tra 30 e 120 con incremento di 1.
 ```{r}
 y = seq(30, 120, 3)

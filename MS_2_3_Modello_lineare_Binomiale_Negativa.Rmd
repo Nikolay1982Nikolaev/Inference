@@ -9,7 +9,48 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Modello lineare generalizzato per i conteggi basato sulla distribuzione Binomiale Negativa
+## Modello lineare generalizzato per i conteggi basato sulla distribuzione Binomiale Negativa o di Pascal
+
+Binomiale Negativa (BN) e utilizzabile per una variabile Y
+che corrisponde al numero di insuccessi prima di arrivare ad un certo numero
+
+
+di successi in una sequenza di prove Bernoulliane, cioe prove che hanno due
+possibili esiti, appunto successo o insuccesso. Nello specico la distribuzione
+e caratterizzata da due parametri: p che indica la probabilita di successo e k
+che indica il numero dei successi. La sua funzione di probabilita e data dalla
+seguente espressione:
+
+$$ p(Y=y)=\frac{(k+y-1)!}{y!(k-1)!} p^k q^y $$
+
+- y = 0, 1...
+- q = 1 - p
+
+
+Si noti che ha una portata piu generale della distribuzione
+di Poisson perche la moda della distribuzione di Poisson e pari a zero
+solo per valori del parametro inferiori a 1. Anche la distribuzione Binomiale
+Negativa e unimodale ma la moda puo essere pari a zero per qualsiasi valore
+del parametro. In realta infatti possono presentarsi vari eventi con moda zero
+ma media molto superiore, si pensi ad esempio al conteggio relativo all'anno
+precedente per una certa popolazione del numero di volte in cui ci e allenati
+in una palestra.
+
+In letteratura, e stato riconosciuto che la distribuzione Binomiale Negativa
+(opportunamente modicata per permettere valori di k non interi) generalizza
+la distribuzione di Poisson in modo che la varianza possa essere superiore
+al valore atteso, mentre nella Poisson queste due grandezze sono vincolate ad
+essere uguali
+Quindi tale distribuzione si applica
+per modellizzare i fenomeni in cui e presente overdispersion.
+
+
+$$E[Y] = \mu$$
+
+$$Var[Y] = \mu +vVar{\lambda} > \mu$$
+- dove $\lambda $ is the parameter of the Poisson distribution
+
+
 
 Si considerino i seguenti dati riguardanti dei grachi particolari ( per sapere cosa sono si
 rimanda al seguente video https://www.youtube.com/watch?v=6gydJh6rP50). Si tratta

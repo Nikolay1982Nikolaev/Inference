@@ -8,9 +8,117 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+Nell'inferenza Bayesiana si formula un'ipotesi detta a priori circa la distribuzione
+dei parametri del modello.
+
+L'inferenza e' basata sulla distribuzione a
+posteriori che e' la distribuzione che coniuga l'informazione a priori con quella
+fornita al parametro dal supporto dei dati osservati (verosimiglianza).
+- $p(\theta)$ - a priori per parametro $\theta$
+- $L(\theta) = \prod_{i=1}^n p(y_i |\theta)$ - verosimiglianza
+
+$$ p(\theta|y) = \frac{\prod_{i=1}^n p(y_i|\theta).p(\theta)}{\int_{\Theta} \prod_{i=1}^n  p(y_i|\theta).p(\theta) dx}$$
+- $\int_{\Theta} \prod_{i=1}^n  p(y_i|\theta).p(\theta) dx$ - distribuzione marginale
+
+Distribuzione a posteriori = (Verosimiglianza x distribuzione a priori) / distribuzione marginale
+
+L'approssimazione: dist.Posteriori = (proporzione)= Verosimiglianzi x distribuzione a priori
+
+La probabilita iniziale (a priori) e' la funzione di densita/probabilita del vettore
+dei parametri che dipende (e' condizionata) dall'informazione iniziale (nel
+seguito quest'informazione iniziale si denota come H) e la prior come $p(\theta|H)$
 
 
-# Modello Beta-Binomiale
+##  MODELLI CONIUGATI
+- ovvero quelli in cui la distribuzione a priori e quella a posteriori appartengono alla
+stessa famiglia di densita o probabilita.
+
+
+
+
+
+
+
+
+
+# Modello Beta-Binomiale:
+Si consideri la proporzione di un certo evento nella popolazione in base a n
+osservazioni campionarie indipendenti. Il numero di successi osservati sono
+assunti come determinazioni da una variabile casuale Binomiale. Nell'ambito
+dell'inferenza Bayesiana la probabilta di successo $\theta$ e' caratterizzata da una distribuzione a priori che deve essere definita in [1,0]
+
+Una scelta ragionevole per la prior e' distribuzione $Beta(\alpha, \beta)$
+
+data che i parametri di interesse e' $\theta$ i parameti della distribuzione a priori sono definiti IPERparametri:
+$$p(\theta) = \frac{1}{Beta(\alpha, \beta).\theta^{\alpha-1} . (1-\theta)^{\beta-1}}$$
+- $0=< \theta =< 1$
+
+Il modello di riferimento per i conteggi e' defnito dalla distribuzione Binomiale
+che generalizza la distribuzione di Bernoulli dove ogni singola prova
+ha probabilita costante di successo $\theta$. Sotto l'ipotesi di variabili casuali siano
+indipendenti e identicamente distribuite il modello statistico diventa il
+seguente
+$$(X_1...X_n|\theta) = Bernoulli(\theta)$$
+
+$$P(X=x|\Theta=\theta) = \theta^x(1-\theta)^{1-x}$$
+
+- x = 0,1
+
+Se si dispone di n realizzazioni indipendenti da un campione casuale $x =
+(x_1; x_2; ... ; x_n)$ la funzione di verosimiglianza
+$$ l(\theta, x) = \prod_{i=1}^n [\theta^x(1-\theta)^{1-x_i}] = \theta^k (1-\theta)^{n-k}$$
+
+- $k =\sum_{i=1}^n x_i$ - numero di sucessi
+
+La distribuzione Beta e la distribuzione Binomiale sono legate, infatti si puo
+pensare al parametro $\alpha$ della distribuzione Beta come il numero di sucessi della distribuzione Binomiale a cui si aggiunge uno $k+1$ e al parametro $\beta$ della distribuzione. Betaq come il numero di insucessi cui si aggiunge uno $n-k+_1$ overo $Beta(k+1, n-k+1)$
+
+La distribuzione Beta e' distribuzuione a priori coniugata alla distribuzione
+Binomiale perche la prior e la posterior hanno stessa forma distributiva.
+Infatti applicando la regola di Bayes anche la distribuzione a posteriori e' una
+Beta. Essendo
+
+
+$$p(\theta) prporzionale -p(\theta).l(\theta, x)$$
+
+
+$$p(\theta|x) -proporzionale-- \theta^{k+\alpha -1}.(1-\theta)^{n-k+\beta-1}$$
+
+La stima Bayesiana della probabilita si eettua considerando il valore atteso
+della distribuzione a posteriori
+
+$$\frac{k+\alpha}{n+\alpha+\beta} = \frac{k}{n}(\frac{n}{n+\alpha+\beta}) + \frac{\alpha}{\alpha + \beta}.(\frac{\alpha+\beta}{n+\alpha+\beta})$$
+
+ovvero si tratta di una media pesata della proporzione campionaria dei successi
+e della media della distribuzione a priori.
+
+- altrimenti come stima puntuale si puo usare la moda della distribuzione a
+posteriori che e' data da
+$$\frac{k+\alpha-1}{n+\alpha+\beta-2}$$
+
+Si dimostra che la costante di normalizzazione e' data da
+
+$$Beta(\alpha, \beta)^{-1} * Beta(\alpha+k, \beta+n - k)^{-1}$$
+
+La distribuzione a posteriori e' proporzionale al prodotto della verosimiglianza e della prior pertanto
+
+
+$$p(\theta|x) = proporzionale == \theta^x(1-\theta)^{n-x} *   \theta^{\alpha-1}(1-\theta)^{\beta-1} = \theta^{k+\alpha-1}(1-\theta)^{n-k+\beta-1} $$
+Il modello coniugato e' defnito Beta-Binomiale.
+
+
+Si dimostra che la media a posteriori e una media pesata tra la media della
+distribuzione a priori e la proporzione campionaria $\hat{\theta_{ML}} = \frac{k}{n}$ (stima di
+massima verosimiglianza) ed il peso dipende dalla numerosita campionaria.
+
+
+La versomiglianza ha piu peso rispetto alla distribuzione a priori quando il
+campione e' particolarmente ampio
+
+
+
+
+
 
 In un campione di 20 (n) pazienti, 13 (k) pazienti sono ipertesi. SI ipotizza un modello Beta 
 Binomiale per stimare la proporzione di pazienti nella popolazione di riferimento.
