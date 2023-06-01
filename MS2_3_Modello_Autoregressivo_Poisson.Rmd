@@ -9,8 +9,105 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## modelli lineari generalizzati per dati di conteggio:
+Si consideri una variabile risposta Y e un insieme di variabili esplicative, il
+modello lineare generalizzato permette di assumere una distribuzione diversa
+dalla distribuzione normale per Y e di modellizzare funzioni non lineari per
+la media. Nel caso dei modelli lineari generalizzati per dati di conteggio, il
+modello assume per la variabile risposta una distribuzione di Poisson o una
+distribuzione Binomiale Negativa.
+Il modello presenta tre componenti:
+
+- le variabile risposta e le n-osserivazioni campionarie $y_1,...y_n$ sono assunte come realizzazioni
+
+- le variabile esplicative: sono le p-covariate con le quali si intende spiegare la variabilita della risposta e si considera un predittore lineare del tipo $\beta_0 + \beta_1.x_{i1}+ ... + \beta_p.x_{ip}$
+
+- la dunzione legame- LINK: si tratta di una funzione g che viene applicata al valore attesso condizionato della reisposta date le covriate:
+$$g(\mu_i) = \beta_0 + \beta_1.x_{i1}+ ... + \beta_p.x_{ip}$$
+
+per i=1...n
+
+Nel caso in modelizzare i conteggi la distribuzione di riferimento e' quella di Poisson , e la funzione log e' la funzione legame:
+
+$$\log{\mu_i} = \beta_0 + \beta_1.x_{i1}+ ... + \beta_p.x_{ip}$$
+ed il modello lineare generalizzato e' chiamato modello log-lineare di Poisson.
+
+Se invece della Poisson si assume la distribuzione Binomiale Negativa
+per permettere l'overdispersion il modello e' detto modello log-lineare basato
+sulla distribuzione Binomiale Negativa.
+
+La scelta del modello che comprende un insieme ottimale di variabili esplicative
+viene efettuata generalmente utilizzando i criteri d'informazione.
+
+Se
+la stima del modello avviene con il principio di massima verosimiglianza la
+log-verosimiglianza del modello cresce aumentando il numero dei parametri
+pertanto i criteri d'informazione penalizzano la log-verosimiglianza per il
+numero dei parametri.
+
+Con questi criteri il modello viene scelto in base al
+valore minimo dell'indice d'informazione quando si confrontano modelli con
+un numero di parametri diversi.
+
+### Bayesian Information Criterion (BIC)
+
+$$ BIC_k = -2 \hat{l_k} (\theta) + par_k.\log{n}  $$
+- $\hat{l_k}$  - l valore della log-verosimiglianza a convergenza dell'algoritmo
+di stima con un numero di parametri pari a k.
+
+- $par_k$ - parametri del modello
+
+La log-verosimiglianza
+viene pertanto penalizzata per il numero dei parametri del modello 
+tenendo conto del logaritmo della numerosita (n) delle osservazioni.
+
+
+### Criterio di Akaike - AIC
+
+$$ AIC_k = -2 \hat{l_k} (\theta) + 2.par_k$$
+e rispetto al BIC non considera la numerosita complessiva.
+
+
+
+
+############################################
+
 
 # Modello autoregressivo di Poisson non omogeneo
+
+Alcune volte e opportuno ipotizzare che il tasso degli arrivi degli eventi che il
+processo di Poisson conta non sia costante nel tempo. Pertanto si considera
+un processo di Poisson con tasso non costante.
+
+L'utilizzo del modelli di Poisson permette anche di tenere conto in
+modo adeguato di queste irregolarita creando una sorta di eetto smoothing
+o lisciamento nei dati.
+
+
+- modello: ogni variabile $Y_T$ che rappresenta i conteggi giornalieri segua una distribuzione di Poisson con specifico parametro e quindi valore attesso $\lambda_t$.
+
+Si assume che $\lambda_t$ soddisfi la seguente:
+$$  \log{\lambda_t} = \beta_0 + t.\beta_1 + t^2.\beta_2$$
+che corrisponde all'equazione di una parabola che avra una concavita rivolta
+verso il basso quando il coeciente $\beta_2$ e' negativo.
+
+I parametri si possono interpretaare onsiderando che:
+
+$$ \lambda_t = exp(\beta_0) exp(t.\beta_1) exp(t^2.\beta_2)$$
+
+I parametri dei modelli presentati in precedenza, vengono prevalentemente
+stimati con il metodo della massima verosimiglianza. Per il modello iniziale
+basato sul predittore lineare generale senza componente autoregressiva, la
+funzione di verosimiglianza puo essere formulata come segue
+
+
+$$ l(\theta) = \prod_{t=1}^T p(y_t, \lambda_t) $$
+- $\theta$ il vettore contenente tutti i parametri del modello 
+- $p(y_t, \lambda_t)$ e' calcolata in base alla distribuzione di Poisson non omogenea con parametro $\lambda_t$  formulato come nell'equazione 
+$ \lambda_t = exp(\beta_0) exp(t.\beta_1) exp(t^2.\beta_2)$
+
+
+#################################################
 
 ## Analisi della serie storica dei conteggi riferiti a COVID-19
 
@@ -268,7 +365,38 @@ legend("bottomleft",
        
 ```
 
+###################################################
+
+
 ## Modello autoregressivo con distribuzione Binomiale Negativa
+
+
+il modello
+diventa tale che include in modo moltiplicativo un termine casuale specico
+del tempo ed e il seguente:
+
+$$\lambda_t' = \lambda_t exp(\epsilon_t)  $$
+- $\lambda_t;$ - il valore atteso condizionato del conteggio al tempo t, cioe $Y_t$
+
+Il termine casuale rappresenta un possibile errore di specicazione
+del modello dovuto a variabili esplicative non osservate e pertanto omesse dal
+modello e permette, appunto, di tenere conto della eterogeneita non osserva-
+ta.
+
+Generalmente si assume che $\nu_t = exp(\epsilon_t)$ isa indipendente dalle covariate e abbia una particolare distribuzione con valore atteso pari a 1 e varianza constane $\sigma^2$ , che ovviamente puo essere solo postitiva. 
+
+Di conseguenza , il valore atteso e la variaznza di $Y_t$ sono pari a :
+$$\lambda_t \epsilon \lambda_t(1 + \lambda_t /sigma^2)$$
+
+rispettivamente. Si noti che la varianza puo essere superiore al valore atteso
+(overdispersion). La stima dei parametri del modello viene efettuata attraverso
+il metodo della quasi massima verosimiglianza nell'ambito del quale il
+parametro di overdispersion viene stimato sulla base delle stime preliminari
+dei coefcienti di regressione.
+
+
+
+###################################################
 Nel presente esempio si consida un modello basato sulla distribuzione Binomiale Negativa
 per la serie dei conteggi dei casi di pazienti affetti da COVID-19.
 Nell’ applicazione precedente la stima del parametro autoregressivo è diversa da zero $\hat{\rho}=0.99$ beta1.
