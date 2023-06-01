@@ -11,7 +11,7 @@
 
 <meta name="author" content="NikolayNikolaev" />
 
-<meta name="date" content="2023-05-29" />
+<meta name="date" content="2023-05-31" />
 
 <title>Modello_linear_Binomiale_Negativa</title>
 
@@ -352,14 +352,46 @@ display: none;
 
 <h1 class="title toc-ignore">Modello_linear_Binomiale_Negativa</h1>
 <h4 class="author">NikolayNikolaev</h4>
-<h4 class="date">2023-05-29</h4>
+<h4 class="date">2023-05-31</h4>
 
 </div>
 
 
-<div id="modello-lineare-generalizzato-per-i-conteggi-basato-sulla-distribuzione-binomiale-negativa" class="section level2">
+<div id="modello-lineare-generalizzato-per-i-conteggi-basato-sulla-distribuzione-binomiale-negativa-o-di-pascal" class="section level2">
 <h2>Modello lineare generalizzato per i conteggi basato sulla
-distribuzione Binomiale Negativa</h2>
+distribuzione Binomiale Negativa o di Pascal</h2>
+<p>Binomiale Negativa (BN) e utilizzabile per una variabile Y che
+corrisponde al numero di insuccessi prima di arrivare ad un certo
+numero</p>
+<p>di successi in una sequenza di prove Bernoulliane, cioe prove che
+hanno due possibili esiti, appunto successo o insuccesso. Nello specico
+la distribuzione e caratterizzata da due parametri: p che indica la
+probabilita di successo e k che indica il numero dei successi. La sua
+funzione di probabilita e data dalla seguente espressione:</p>
+<p><span class="math display">\[ p(Y=y)=\frac{(k+y-1)!}{y!(k-1)!} p^k
+q^y \]</span></p>
+<ul>
+<li>y = 0, 1…</li>
+<li>q = 1 - p</li>
+</ul>
+<p>Si noti che ha una portata piu generale della distribuzione di
+Poisson perche la moda della distribuzione di Poisson e pari a zero solo
+per valori del parametro inferiori a 1. Anche la distribuzione Binomiale
+Negativa e unimodale ma la moda puo essere pari a zero per qualsiasi
+valore del parametro. In realta infatti possono presentarsi vari eventi
+con moda zero ma media molto superiore, si pensi ad esempio al conteggio
+relativo all’anno precedente per una certa popolazione del numero di
+volte in cui ci e allenati in una palestra.</p>
+<p>In letteratura, e stato riconosciuto che la distribuzione Binomiale
+Negativa (opportunamente modicata per permettere valori di k non interi)
+generalizza la distribuzione di Poisson in modo che la varianza possa
+essere superiore al valore atteso, mentre nella Poisson queste due
+grandezze sono vincolate ad essere uguali Quindi tale distribuzione si
+applica per modellizzare i fenomeni in cui e presente
+overdispersion.</p>
+<p><span class="math display">\[E[Y] = \mu\]</span></p>
+<p><span class="math display">\[Var[Y] = \mu +vVar{\lambda} &gt;
+\mu\]</span> - dove $$ is the parameter of the Poisson distribution</p>
 <p>Si considerino i seguenti dati riguardanti dei grachi particolari (
 per sapere cosa sono si rimanda al seguente video <a href="https://www.youtube.com/watch?v=6gydJh6rP50" class="uri">https://www.youtube.com/watch?v=6gydJh6rP50</a>). Si tratta
 di 173 femmine di granchi. Durante la stagione della deposizione delle

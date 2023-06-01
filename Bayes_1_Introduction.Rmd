@@ -1,0 +1,203 @@
+---
+title: "Bayes_1_Intro"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Modelli per l'inferenza Bayesiana
+
+## 1.1 Defnizioni
+
+la regola di Bayes viene impiegata per determinare
+la distribuzione a posteriori del parametro $\theta$ o del vettore dei parametri $\theta \in \Theta$ del modello statistico.
+
+Le tre componeneti:
+1. la probabilita iniziale
+2. la verosimiglianza
+3. la probabilita a posteriri
+
+La probabilita iniziale (a priori) e la funzione di densita/probabilita del vettore
+dei parametri che dipende (e condizionata) dall'informazione iniziale ($H$) e la prior come $p(\theta|H)$
+
+Nel contesto sperimentale o osservazionale spesso si fanno ipotesi o congetture
+sul valore del parametro e queste diventano l'oggetto della distribuzione
+a priori oppure si tratta delle informazioni ricavate da studi precedenti e
+consolidate nella pratica del campo applicativo. Le informazioni a priori si
+integrano con quelle fornite dai dati e l'inferenza si basa sulla distribuzione
+a posteriori.
+
+Disponendo di dati campionari $x = (x_1, x_n)$ considerate come realizzazioni
+dalle variabili casuali $X = (X_1, ..., X_n)$ la probabilita a priori viene
+aggiornata con la verosimiglianza e la distribuzione a priori viene sostituita
+dalla distribuzione a posteriori (posterior). La probabilita a posteriori si ricava
+applicando la regola di Bayes come prodotto normalizzato della prior e
+della verosimiglianza.
+
+$$p(\theta|X, H) = \frac{p(\theta|X, H)}{p(X|H)} = \frac{p(X|\theta, H).p(\theta|H)}{p(X|H)} $$
+- $p(X|H)$ = \int_{\theta} p(\theta, X|H)d\theta$ quando $\theta$ ha un supporto $\in R$
+
+
+Media posteriori:
+$$E[\theta, x_1...x_n] = \int \theta_p (\theta|x_1...x_n)d\theta  $$
+La distribuzione a posteriori cumulativa:
+
+$$ p(\theta <a "x_1...x_n) = \int I(\theta) p(\theta|x_1...x_n)d\theta$$
+
+- I vale 1 se $\theta \in a$ e 0 altrimenti
+
+La distribuzion preditiva: viene ricavata considerando la distribuzione a posterio.
+- conoscendo $x_1..x_n$ si intende prevedere $x_{n+1}^*$
+
+$$p(x_{n+1}^* |x_1...x_n) = \frac{p(x_1...x_n, x_{n+1}^*)}{p(x_1...x_n)} $$
+si calcola risolvendo:
+
+$$ p(x_{n+1}^*|x) = \int p(x_{n+1}^*|\theta,x)p(\theta|x)d\theta$$
+
+che non sempre e risolvibile analiticamente se non per le famiglie di modelli
+che vengono denite coniugate.
+
+$$ ... $$
+
+Costante di normalizzazione $k$: aggiustaare il risultato 
+
+$$p(\theta|x) = k.l(\theta,x)p(\theta)$$
+
+con il vincolo anche sia una funzione di densita:
+ $$ 1= \int_{\Theta} k.l(\theta,x)p(\theta)d\theta $$
+ da cui:
+ $$ \frac{1}{k} = E_{\theta}[l(\theta, x)] $$
+ 
+ dove il valore attesso rapressenta la **distribuzione prevista** di X.
+ 
+ Distribuzione preditiva diventa:
+ $$ p(x_{n+1}^*) = E[p(x_{n+1}^*, \theta)|x]$$
+ 
+ che dipende da dati osservati.
+ 
+ # Ragionamento sequenziale:
+ 
+ Da un vettore di osservazioni $x_1 = (x_{11}, ... , x_{1n})$
+ $$ p(\theta|x_1) = proporzionale = l_1(\theta, x_1)p(\theta)$$
+ 
+ si considerano ulteriori realizzazioni $x_2 = (x_{21}, ..., x_{2n})$ ottenuti sucessivamente e indipendenti dalle precedenti.
+ 
+ $$p(\theta|x_1, x_2) = proporzionale = l_2(\theta, x_2)p(\theta|x_1) =proporzionale = l_1(\theta,x_1).l_2(\theta.x_2)p(\theta) $$
+ 
+ Generalizzando ad una sequenza di osservazioni ottenute dopo la due precedenti
+e da queste indipendenti $x_2,x_4...x_n$ si puo scrivere:
+
+$$p(\theta| xm, x_{x-1},..., x_1) =proporzionale = \prod_{i=1}^n l_i(\theta, x_i)p(\theta) $$
+la densita a posteriori e denita rispetto al prodotto delle rispettive verosimiglianze
+e della distribuzione a priori.
+
+## ESEMPIO 1:
+
+- 0.7 sia malato
+Formalizzando si considera una variabile casuale con distribuzione di Bernoulli
+dove la probabilita di essere malato e denita dal parametro $0 < \theta < 1$
+- a priori:
+$$p(\theta=1) = 0.7$$
+
+- secondo test: 95% positivo , in presenza di malatia, ma risulta positivo anche in asenza della malatia in 40 casi su 100 (falsi positiv)
+
+$$p(X=1|\theta=1) = 0.95$$
+
+$$p(X=1|\theta=0) = 0.4 $$
+
+Probabilita posteriori:
+
+$$p(\theta=1|X=1) \propto p(X=1|theta=1).p(\theta=1) = 0.95x0.7 = 0.665   $$
+ Inoltre:
+ $$ p(\theta=0 |X=1) \propto p(X=1|\theta=1)p(\theta=0) = 0.4x0.3=0.12   $$
+ 
+ Si noti che le precedenti probabilita sono riferite al parametro condizionatamente
+a cio che si e vericato e si calcolano come prodotto tra il supporto che
+orono i dati osservati al valore del parametro (i test svolti in precedenza) e
+l'informazione a priori derivante dal giudizio del medico a seguito della visita
+ed in base alla sua esperienza.
+
+Dato che anche si tratti di una probabilita
+la somma deve essere 1 ed e necessario il calcolo della costante k denita nel
+seguito costante di normalizzazione per rendere il valore congruente
+
+$$ kx0.665 + kx0.12 = 1$$
+$$ k = 1/0.785 $$
+
+La probabilita stimata in precedenza deve essere scalata per la costante di
+normalizzazione k
+
+$$ p(\theta=1|X=1) = 0.665 xk = 0.665 /0.785 = 0.847 $$
+
+e
+
+$$ p(\theta=0|X=1) = 0.12 xk = 0.120 0.785 = 0.153 $$
+
+In conclusione a seguito degli eventi la probabilita iniziale di avere la tonsillite
+e maggiore di quella assegnata a priori.
+
+
+Continua:
+
+- un nuovo test 
+
+Se il dottore decide di eettuare un secondo test maggiormente preciso inviando
+il paziente al laboratorio diagnostico il calcolo della probabilita a
+posteriori puo essere eettuato in base alla regola sequenziale.
+
+Sia Y sia la
+variabile casuale che assume valore 1 se il test B risulta positivo e 0 altrimenti.
+
+Supponendo che questo test sia risultato positivo 99 volte su 100 in
+presenza della malattia, e sia risultato positivo 4 volte su 100 in assenza della
+malattia, si ottiene
+
+$$P(Y=1|theta=1) = 0.99 $$
+$$P(T=1|\theta=0) = 0.04 $$
+
+Da cui:
+1. la probabilita il test 2 sia positivo quando il tese A e' risultato positivo:
+
+$$ P(Y=1|X=1) = P(Y=1|\theta=1)P(\theta=1|X=1) + P(Y=1|\theta=0)P(\theta=0|X=1) $$
+
+risulta:
+
+$$P(Y=1|X=1) = 0.99x0.847 + 0.04.0153 = 0.845 $$
+
+
+Mentre la probabilita che il test B sia negativo quando il test a e
+risultato positivo si calcola come complemento a uno della precedente
+
+$$ P(Y=0|X=1) = 1- P(Y=1|X=1) = 1- 0.845 = 0.155 $$
+2. La probabilita a posteriori di avere la malattia (a seguito dell'esito di
+entrambi i test) si calcola nel modo seguente:
+
+2.1: quando il test a e risultato positivo mentre il test B piu preciso e
+risultato negativo:
+
+$$P(\theta=1|X=1, Y=0) $$
+$$P(\theta=1|X=1, Y=0) \propto [1- P(Y=1|\theta=1)].P(\theta=1|X=1) = 0.01x0.847 = 0.008 $$
+
+
+2.2: quando il test 1 e risultato positivo ed il test 2 negativo:
+
+$$P(\theta=0|X=1, Y=0) \propto [1- P(Y=1|\theta=0)].P(\theta=0|X=1) = 0.96x0.153 = 0.147 $$
+
+Costante di normalizzazione:
+$$k(0.008) + k(0.147) = 1 $$
+$$k = \frac{1}{0.1555}
+
+Normalizzare la probabilita stimata:
+
+$$P(\theta=1|X=1, Y=0) = \frac{0.008}{0.155} = 0.052 $$
+
+$$P(\theta=0|X=1, Y=0) = \frac{0.147}{0.155} = 0.948 $$
+
+In conclusione la probabilita che il paziente sia malato e molto bassa. a
+seguito di ulteriori evidenze empiriche la probabilita iniziale (0.7) assegnata
+dal dottore si e notevolmente ridimensionata.
+
