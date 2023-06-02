@@ -1,0 +1,373 @@
+---
+title: "Bayes_chpater_1"
+author: "NikolayNikolaev"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1.2 Principali famiglie coniugate
+Nella sezione seguente vengono illustrati i principali modelli coniugati ovvero
+quelli in cui la distribuzione a priori e quella a posteriori appartengono alla
+stessa famiglia di densita o probabilita.
+
+## Modello Beta-Binomiale
+
+Si consideri la proporzione di un certo evento nella popolazione in base a n
+osservazioni campionarie indipendenti. Il numero di successi osservati sono
+assunti come determinazioni da una variabile casuale Binomiale. Nell'ambito
+dell'inferenza Bayesiana la probabilta di successo $\theta$ e' caraterizza da una distribuzione a priori che deve essere definita in [0,1].
+
+Una scelta per la prior e' distribuzione $Beta(\alhpa, \beta)$. Dato che il parametro di interesse e' $\theta$ i parametri della distribuzione a priori sono definiti IPERPARAMETRI:
+
+$$p(\theta) = \frac{1}{Beta(\alpha, \beta)} \theta^{\alpha-1} (1-\theta)^{\beta-1}  $$
+
+- $0 =< \theta =< 1$
+
+Il modello di riferimento per i conteggi e denito dalla distribuzione Binomiale
+che generalizza la distribuzione di Bernoulli dove ogni singola prova
+ha probabilita costante di successo $\theta$. Sotto l'ipotesi di varibili casuali siano indipendenti i identicamente distribuiti il modello statistico diventa:
+
+$$ (X_1, X_2...X_n|\theta) \sim Bernoulli(\theta)$$
+
+$$ p(X=x|\Theta= \theta)= \theta^x (1-\theta)^{1-x}$$
+
+- x= 0,1
+
+Se si dispone di n-realizzazion indipendenti da un campione casulae $x=(x_1, x_2...x_n)$ la funzione di verosimiglianza e':
+
+$$ l (\theta, x) = \prod_{i=1}^n [\theta^{x_i} (1-\theta)^{1-x_i}] = \theta^k (1-\theta)^{1-x} $$
+
+- $x=0,1$
+- $k = \sum_{i=1}^n x_i$ - numero dei sucesso
+
+La distribuzione Beta e la distribuzione Binomiale sono legate, infatti si puo
+pensare al parametro $\alpha$ della distribuzione Beta come il numero di successi della distribuzione Binomiale a cui si aggiunge uno $k+1$ e al parametro $\beta$ della distribuzione $Beta$ come il numero di insucessi cui si aggiunge uno $n-k+1$ ovvero $Beta(k+1, n-k+1)$
+
+La distribuzione Beta e' distribuzuione a priori coniugata alla distribuzione
+Binomiale perche la prior e la posterior hanno stessa forma distributiva.
+Infatti applicando la regola di Bayes anche la distribuzione a posteriori e' una
+Beta.
+
+$$p(\theta) \propto p(\theta) l(\theta, x) $$
+
+$$p(\theta|x) \propto \theta^{k+\alpha-1} (1-\theta)^{n-k + \beta-1}$$
+che e' una distribuzione Beta con parametri $Beta(\alpha+k, \beta+n -k)$
+
+La stima Bayesiana della probabilita si effettua considerando il valore atteso della distribuzione a posteriori:
+
+$$\frac{k-\alpha}{n+\alpha +\beta} = (\frac{n}{n+\alpha + \beta}) \frac{k}{n} + (\frac{\alpha + \beta}{n + \alpha + \beta})\frac{\alpha}{\alpha + \beta} $$
+
+
+ovvero si tratta di una media pesata della proporzione campionaria dei successi
+e della media della distribuzione a priori.
+altrimenti come stima puntuale si puo usare la moda della distribuzione a
+posteriori che e' data da
+
+$$ \frac{k + \alpha -1}{ n +\alpha +\beta -2} $$
+Si dimostra che la costante di normalizzazione e' data da
+
+$$B(\alpha, \beta)^{-1} x B(\alpha + k, \beta +n - k)^{-1} $$
+
+La distribuzione a posteriori e proporzionale al prodotto della verosimiglianza e della prior pertanto
+
+$$P(\theta|x) \propto \theta^x (1-\theta)^{n-x} . \theta^{\alpha-1}(1-\theta)^{\beta-1} =  \theta^{k+\alpha -1} (1-\theta)^{n-k + \beta -1}  $$
+
+Si dimostra che la media a posteriori e' una media pesata tra la media della
+distribuzione a priori e la proporzione campionaria $\hat{\theta}_{ML}= \frac{k}{n}$ ed il peso dipende dalla numerosita campionaria.
+La versomiglianza ha piu peso rispetto alla distribuzione a priori quando il
+campione e' particolarmente ampio
+
+## Esempio:
+
+Si intervistano 1142 persone residenti a Milano chiedendo se sono
+favorevoli o contrari all'obbligo vaccinale per il Covid: 814 si dicono favorevoli
+e 328 contrari.
+
+1. La stima di massima verosimiglianza del parametro che rappresenta la
+proporzione dei favorevoli $\hat{\theta}_{ML}= \frac{k}{n}$ nella popolazione e' 814/1142=0.713.
+
+La stima intervallare si ottiene ricordando che a livello asintotico (per n
+elevato) $\hat{\theta}_{ML}= \frac{k}{n} -+ z_{\frac{\alpha}{2}} \sqrt{\frac{\hat{\theta}_{ML} (1-\hat{\theta}_{ML})}{n}}$  da cui si ottiene il seguente l'intervallo
+di confdenza calcolato al livello del 95% (0.686, 0.738).
+
+2. Nell'approccio Bayesiano dobbiamo invece supporre una probabilita a
+priori per il parametro. In base al modello Beta-Binomiale possiamo
+ad esempio scegliere a priori una Beta($\alpha=0.5, \beta=0.5$) (definita anche
+prior di Jefrey perche e' rimane invariata se il parametro subisce trasformazioni
+di scala, questa prior e' poco informativa ovvero conduce
+a risultati inferenziali abbastanza simili a quelli forniti dall'inferenza
+classica).
+
+In tale situazione si ha k=814, n- k=328 e la distribuzione
+a posteriori e' una $Beta(\alpha^*, \beta^*)$ con $\alpha^* = (k+\alpha)= 814.5$ and $\beta^* = 328.5$ pertanto il valore atteso della distribuzione a posteriori:
+
+$$\hat{\theta}_B = \frac{\alpha^*}{\alpha^* + \beta^*} = \frac{814.5}{814.5+328.5} = 0.713$$
+
+In questo caso le due stime puntuali del parametro coincidono.
+
+
+In sintesi:
+- la distribuzone a posteriori e' una $Beta(\alpha+k, \beta+n-k)$
+- la distribuzione mariginale (ovvero il denominatore della regole Bayesiana) e' data dalla seguente espressione che coinvolge diverse funzioni Gamma:
+
+$$p(x_1,x_2,...,x_n) = \int_0^1 l(x, \theta)p(\theta)d\theta  = \frac{\Gamma(\alpha+\beta) \Gamma(\alpha+k)\Gamma(\beta+n -k)}{\Gamma(\alpha)\Gamma(\beta) \Gamma(\alpha+\beta+k)}  $$
+- La distribuzione predittiva ha la seguente espressione
+
+$$ p(X_{n+1} = 0|x) = 1 -E[\theta|x] = \frac{\beta +\sum_{i=1}^n (1-x_i)}{\alpha +\beta +n}  $$
+$$ p(X_{n+1}=1|x) = E[\theta|x] = \frac{\alpha + k}{\alpha + \beta +n}   $$
+
+Si noti che la distribuzione predittiva non dipende da quantita da stimare
+(ovvero non dipende da $\theta$ ma solo dai dati osservati che forniscono
+informazioni sul parametro).
+
+## Esempio: Bayes Billiard Balls
+
+Nell'esempio denominato Bayes Billiard Balls, dall'originario
+scrigto di Bayes, si considera una variabile casuale X con una
+distribuzione Binomiale e n prove indipendenti. Per ogni intero k (somma di
+successi) tale che $ 0=< k =< n $ occorre detarminare $P(a < \theta< \beta|X=k)$.
+
+Si dimostra che:
+$$ P(X=k) = \inf_0^1 \binom{n}{k} \theta^k (1-\theta)^{n-k} dx = \frac{1}{n+1} $$
+
+ovvero la distribuzione marginale della variabile casuale e' una distribuzione
+uniforme discreta.
+
+Le due seguenti dimostrazioni illustrano senza calcoli che la parte destra (di-
+mostrazione 1) e la parte sinistra (dimostrazione 2) dell'equazione precedente
+sono uguali.
+
+### Dimostrazione 1: 
+Si dispone di n palline colorate blu e di una pallina
+gialla e si tirano verso un segmento di lunghezza predefinita assumendo che
+ogni lancio sia il risultato di prove indipendenti la cui variabile casuale segue
+una distribuzione di Bernoulli con probabilita di successo $\theta$ La posizione
+delle palline genera delle realizzazioni di numeri pseudo-casuali secondo la
+denizione moderna.
+
+### PHOTO pagina 22
+
+La variabile casuale X conta il numero di palline blu che si
+posizionano prima della pallina gialla (a sinistra) e una variabile casuale
+discreta a valori in 0; 1; : : : ; n. Per calcolare la probabilita di avere un numero
+di successi pari a k si considera la probabilita del numero di palline Blu a
+sinistra della gialla $P(X=k|\theta=Blu)$ definita da una variabile casuale $Binomiale(n, \theta)$.
+
+La probabilita marginale si determina integrando sul supporto la probabilita
+condizionata per la probabilita a priori assumendo quest'ultima uniforme sul
+sul supporto di
+
+$$p(X=k) = \int_0^1 p(X=k|\theta=Blu) p(\theta)d\theta$$
+
+Dalle considerazioni precedenti risulta che:
+
+$$ p(X=k) = \int_0^1 \binom{n}{k} \theta^k (1-\theta)^{n-k} d\theta = \frac{1}{n+1}   $$
+
+Ad esempio quando n = 10 e k = 2:
+
+$$ p(X=2) = \frac{1}{10+1} = 0.09 $$
+
+pertanto la probabilita e costante per ogni k.
+
+### Dimostrazione 2: 
+Si dispone di n + 1 palline tutte blu e queste si tirano
+a caso nel segmento di lunghezza unitaria. Si sceglie una pallina a caso e la
+si colora di giallo. Sia (X = k) il numero delle palline blu a sinistra della
+pallina gialla
+
+
+$$ p(X=k) = \frac{1}{n+1} $$
+
+per k=0,1...n e sia la distribuzione a priori una distribuzione uniforme $\theta \sim Beta(1,1) = Unif(1,1)$. La distribuzione condizionata dell'evento (X=k|Blu=\theta)$ numero di palline blu prima della pallina gialla e' una $Binomiale \sim p(X=k|\theta) = Bin(m, \theta)$ (verosimiglianza). La distribuzione a posteriori e' la seguente:
+
+$$ p(\theta|X=k) = \frac{p(X=k|\theta).p(\theta)}{p(X=k)} $$
+
+$$ p(\theta|x=k) \propto \theta^k(1-\theta)^{n-k} $$
+
+## 1.2.2. Famiglie Coniugate:
+
+Una distribuzione di probabilita iniziale e coniugata al modello o, equivalentemente,
+alla funzione di verosimiglianza quando la forma funzionale della
+distribuzione a posteriori e la stessa della distribuzione a priori.
+
+### Definizione:
+
+Sia $F=p(x|\theta), \theta \in \Theta$ l afamiglia di campionamento o di osservazione (modello statistico assunto per i dati), sia P un insieme di distribuzione si dice che P e' una *famiglia coniugata* rispetto F se per ogni $x \in F$ eper ogni probabilita a priori $p(\theta) \in P$ la distribuzione a posteriori risulta $\p(\theta|x) \in P$
+
+Analogamente si po scrivere la probabilita a priori in funzione di un insieme di parametri definiti *iperparametri* $\gamma \in R$ nel modello seguente:
+
+Il modello e' detto coniugato se la distribuzione a posteriori possonoesere scritte:
+$$p(\theta, \gamma_n (x))$$
+
+ovvero hanno la stessa struttura analitica della distribuzione a priori con gli
+iperparametri aggiornati in base ai dati osservati.
+
+Si richiede implicitamente che tutte le distribuzioni marginali abbiano la stessa
+forma distributiva (cf. Teorema di rappresentazione De Finetti). Occorre
+che ogni possibile valore di  abbia una probabilita positiva anche se molto
+bassa (Lindley Cromwell's rule).
+
+Tra le famiglie coniugate si distinguono le famiglie naturali rispetto al modello
+di campionamento riferito alla log-verosimiglianza. Ad esempio, la classe
+di tutte le distribuzioni $B(\alpham, \beta)$ con prametrii che assumono valori interi rappresenta una famiglia coniugato naturale per lo schema di campionamento di Bernoulli.
+
+## 1.3 Scambiabilita
+La scambiabilita e una condizione necessaria per l'applicazioni della regola
+Bayesiana ed esprime il concetto di realizzazioni ripetute in esperimenti
+equivalenti. Una denizione di scambiabilita e la seguente.
+
+### Denizione: 
+Se si dispone di una permutazione degli indici delle variabili $X_1,..., X_n$
+queste sono dette scambiabili quando tutte le possbili permutazioni (ovvero n!)
+presentano la stessa distribuzione n-dimensionale.
+
+Dalla denizione si deduce che tutte le distribuzioni marginali di ogni possibile
+permutazione devono essere somiglianti. Inoltre una sequenza **infnita** di variabili casuali $X_1;X_2; ... ;$ e detta scambiabile se ogni n 􀀀 pla di variabili
+aleatorie scelta dalla successione risulta scambiabile.
+Una denizione equivalente di scambiabilita e la seguente.
+
+### Definizione: Le variabile aleatorie $X_1,...X_n$ si dicono scambiabile se la funzione di ripartizione congiunta di una qualunque permutazione della componenti coincide con quella delle variabili aleatorie originarie.
+
+### Definizione: Siano $X_1,X_2...$ una successione innita di variabili scambia-
+bili che assumono solo due valori con distribuzione di probabilita P. Per ogni
+intero n si considera la successione $S_n = X_1 + X_2 +...+X_n$. Esiste una funzione di ripartizione $F(\theta)$ tale che per ogni n-pla $(x_1, x_2,...x_n)$ euqsta puo essere rappresentata nel modo che segue.
+
+$$P(X_1= x_1, X_2=x_2 ...) = \int_0^1 \prod_{i=1}^n [\theta^{x_i} (1-\theta)^{1-x_i}]dF(\theta)= \int_0^1 [\theta^{S_n}(1-\theta)^{n-S_n}]dF(\theta)$$
+
+- $F(\theta)$ e la funzione di ripartizione limite verso cui converge al crescere
+di n la funzione di ripartizione associata alla frequenza relativa $S_n/n$ allora:
+
+$$F(\theta) = \lim_{n-\infty} P(\frac{S_n}{n} =< \theta) $$
+e
+
+$$ \theta = \lim_{n->\infty} \frac{S_n}{n} $$
+
+In base all'ipotesi di scambiabilita le variabili osservabili possono essere considerate
+indipendenti e somiglianti condizionatamente a $\theta$. La scambiabilit
+a e garantita se si tratta di una successione innita. Tuttavia le sequenze
+nite scambiabili sono approssimazioni di sequenze innitamente scambiabili,
+e quindi i risultati stabiliti dal teorema di de Finetti sono validi
+approssimativamente anche per sequenze scambiabili nite.
+
+In base alla scambiabilita viene assegnata la stessa probabilita a due sequenze
+diverse ciascuna di stessa lunghezza n aventi stessa proporzione di valori
+pari a 1. Quando i dati sono innitamente scambiabili, si assume un parametro $\theta$ che definisce il modello stocastico generatore delle realizzazioni, e una densita ripetto a $\theta$ che non dipende dai datai. Questa densita e interpretabile
+come una densita a prescindere dalle realizzazioni, poiche caratterizza le conoscenze
+sul parametro $\theta$ che non sono condizionate dai dati. Questo teorema
+fornisce il presupposto per l'esistenza di una densita riferita al parametro che
+prescinde dalle osservazioni.
+
+In base al teorema non e necessario ai ni inferenziali esplicitare P ma basta
+specicare $F(\theta)$ ovvero la distribuzione del parametro che induce la
+distribuzione probabilistica della successione $X_1, X_2...$
+
+
+In pratica le variabili casuali $X_1, X_2,...X_n$ possono essere considerate indipendenti
+e somiglianti (ovvero aventi stessa distribuzione di probabilita) cos
+come le loro coppie, terne, etc.. Non e necessario conoscere la successione
+di tutti i risultati delle prove, e suciente numero totale dei successi. Si
+noti che l'elicitazione della prior deve avvenire rispetto al comportamento
+asintotico di $F(\theta)$. Ovvero $F(\theta)$ puo essere interpretata come espressione
+delle valutazioni sui valori che puo assumere la frequenza relativa limite dei
+successi quando si incrementa la numerosita delle osservazioni.
+
+### 1.3.1 Esempio
+Nel seguente esempio riguardante l'emolia (malattia congenita ereditaria
+che inibisce il cromosoma X detta X-linked recessiva) tratto da (Gelman
+et al., 2013) si considera la probabilita per una donna di risultare portatrice
+del gene della malattia sapendo che una donna ne e colpita solo se glia di
+padre emolitico e madre portatrice sana. Se una donna ha un fratello aetto
+da emolia signica che la mamma di questi e portatrice di due geni: quello
+nocivo e quello neutro. assumendo che il padre non e aetto dalla malattia
+si e interessati a calcolare la probabilita che la mamma sia o meno portatrice
+del gene.
+
+La distribuzione a priori per $\theta$ (evento che indica se la mamma e portatrice)
+in base alle considerazioni esposte e $p(\theta=1)= p(\theta=0) = 1/2$. Supponendo
+che ci sia una mamma con due gli, si indica con $Y_1$ la variabile casuale  che identica l'evento malattia del primo glio (0 assente, 1 presente) e $Y_2$ la variabile casuale riferita la secondo glio, e considerando assente la possibilit
+a di mutazione, se donna e portatrice della malattia i gli hanno una
+probabilita pari a 0.5 di svilupparla.
+
+Sotto le ipotesi che la distribuzione congiunta $f(x_1,x_2)$ delle due variabili che
+identicano la malattia dei gli soddis il teorema di rappresentazione di de
+Finetti, ovvero assumendo che i due fratelli possano sviluppare la malattia in
+modo indipendente (ad esempio occorre assumere che i gli non siano gemelli
+identici) si ha
+
+$$p(y_1=0, y_2-0|\theta=1) = p(y_1=0|\theta=1)p(y_2=0|\theta=1) = 0.5(0.5)=0.25$$
+
+e
+
+$$ p(y_1=0, y_2=0|\theta=0 )=1x1 =1$$
+
+La distribuzione a posteriori rispetto alla probabilita che la mamma sia
+portatrice considerando $Y=(y-1, y_2)$ and:
+
+$$p(\theta=1|y) = \frac{p(y|\theta=1)p(\theta=1)}{p(y|\theta=1)p(\theta=1)+p(y|\theta=0).p(\theta=0)} $$
+
+$$p(\theta=1|y) = \frac{0.25.0.5}{0.25.0.5 + 1.0,5} = \frac{0.125}{0.525} = 0.2 $$
+
+La probabilita cercata e' 0.2
+
+1.3.2 Modello Gaussiano
+
+Si considera il caso in cui si e interessati alla media di una variabile casuale
+quantitativa:
+- si assegna una distribuzione a priori Gaussiana supponendo nota la
+varianza della popolazione:
+$$ f(\theta) \sim N(\mu, \tau^2)$$
+- $\mu, \tau^2$ iperparemtri e noti.
+
+- assumendo per il momento di disporre di una sola realizzazione campionaria,
+si suppone $f(x|\theta) \sim N(x, \sigma)$ con $\sigma^2$ noto:
+- la la distribuzione a posteriori e proporzionale al prodotto di due distribuzioni
+Gaussiane 
+
+$$f(\theta|x) \sim N(\mu_1, \tau_1^2)$$
+
+con 
+
+$$\mu_1 = \frac{\frac{1}{\tau^2}}{\frac{1}{\sigma^2} +\frac{1}{\tau^2}}.\mu + \frac{ \frac{1}{\sigma^2}}{\frac{1}{\sigma^2} +\frac{1}{\tau^2} }.x $$
+
+$$ \tau_1^2 = \frac{1}{\frac{1}{\sigma^2} + \frac{1}{\tau^2}  }$$
+
+
+Considerando il valore atteso della distribuzione a posteriori $E[\theta|x]= \mu_1$ so domostra che si puo scrivere anche in funzione di $\tau_1$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
