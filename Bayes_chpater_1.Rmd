@@ -338,6 +338,142 @@ $$ \tau_1^2 = \frac{1}{\frac{1}{\sigma^2} + \frac{1}{\tau^2}  }$$
 
 Considerando il valore atteso della distribuzione a posteriori $E[\theta|x]= \mu_1$ so domostra che si puo scrivere anche in funzione di $\tau_1$
 
+$$mu_1 = (\sitgma^{-2}x + \mu.\tau^{-2}).\tau_1^2$$
+
+Ponendo:
+
+- $w= \frac{1}{\tau^2}$
+- $z= \frac{1}{\sigma^2}$
+
+$$m_1 = \frac{w.\mu+z.x}{w+z}$$
+
+$$\tau_1^2= \frac{1}{w+z}$$
+
+In questo modello:
+-  le quantita w e z si ricavano dal reciproco della varianza della distribuzione
+a priori e quella del modello da cui provengono le realizzazioni
+campionarie e sono denite precisioni. Pertanto la precisione a posteriori
+e data dalla somma della precisione del modello e della precisione
+della distribuzione a priori.
+
+
+-  Il valore atteso (o la moda) della distribuzione a posteriori e una media
+ponderata delle medie della distribuzione a priori e della distribuzione
+del modello e delle rispettive precisioni.
+
+- La media a posteriori e una media pesata rispetto alla distribuzione a
+priori e alla verosimiglianza.
+
+- Il peso della media a priori sara tanto piu elevato quanto piu e bassa la
+variabilita stabilita da $\tau^2$ (varianza della distribuzione
+a priori) viene specicato con un valore elevato (ovvero quando
+la precisione e prossima a zero) si dice che la prior e non informativa.
+
+
+Generalizzando al caso di n osservazioni campionarie indipendenti da una
+variabile casuale con distribuzione di Gauss si considera la media $\bar{X}$ che e'
+
+una statistica sufficiente per $\theta$. ed i parametri della distribuzione a posteriori sono:
+
+$$\mu = \frac{\mu.\sigma^2 + n.\bar{x}.\tau^2}{n.\tau^2 + \sigma^2} $$
+$$ \tau_1^2 = \frac{\tau^2.\sigma^2}{n.\tau^2 +\sigma^2}   $$
+
+La distribuzione a posteriori sintetizza le informazioni disponibili sul parametro
+derivanti dalle conoscenze a priori e della evidenze empiriche, il peso
+assegnato alla media nella distribuzione iniziale diventa piccolo al crescere
+della numerosita del campione, perche i dati accrescono la precisione delle
+stime. Se la grandezza del campione e rilevante allora la distribuzione a posteriori
+sara quasi completamente determinata dal risultato sperimentale o
+osservazionale.
+
+Se la varianza della distribuzione iniziale $\tau^2$ e ampiea, la distribuzione a priori e
+poco informativa, infatti non si attribuisce probabilita elevata ad un particolare
+valore del parametro, e pertanto la media della distribuzione a posteriori
+e tale che $\mu_1 \approx \bar{x}$
+
+Se invece si assegna un valore piccolo all'iperparametro $\tau^2$ la distribuzione a priori e' informativa e si ritiene che la variabilita del
+parametro in un certo valore ritenuto maggiormente plausibile sia modesta
+(ovvero si esprimono a priori delle opinioni sul parametro molto forti).
+
+### Esempio:
+
+Per studiare i livelli medi di colesterolo nel sangue di una popolazione omogenea
+di pazienti si ricorre ad una la variabile casuale e tale che
+
+$$X_i = \theta + \epsilon_1$$
+- i =1,...n
+- $\eprsilon_i $ sono variabili casuali stocasticamente indipendenti e tali che $\epsilon_1 \approx N(0, \sigma^2)$ con $\sigma^2>0$ nota. assumendo una distribuzione di Gauss a priori
+per il parametro $\theta$ implicitamente si ipotizza che in media la misurazione del
+
+colesterolo sia compresa tra due estremi e che la maggior parte degli individui
+abbia delle misurazioni tra $\theta \pm 3.\sigma$ (sono piu probabili i valori entro questo
+intervallo che quelli sulle code della distribuzione, si ricorda infatti che nella
+distribuzione di Gauss questo intervallo contiene circa il 99.7% delle osservazioni).
+Pertanto in questo modello si assume vi sia poca probabilita per
+gli eventi estremi. La velocita molecolare e uno degli eventi che usualmente
+viene modellizzato attraverso la distribuzione di Gauss. Inoltre si assume che
+gli scostamenti dal valore medio siano ugualmente plausibili a destra e a sinistra
+e avvengano in uguale misura. In questo contesto una scelta ragionevole
+per i parametri della distribuzione iniziale $\mu, \tau$ e' la seguente:
+
+- $ mu = \frac{min + max}{2}$
+- $\tau = \frac{max-min}{6}$
+
+Si noti che la distribuzione predittiva e anch'essa normale con il seguente
+valore atteso e la seguente varianza.
+
+$$E[X^* = x^*|x] = \mu_1$$
+
+$$Var(X^*=x^*|x)= \tau_1^2 + \sigma^2$$
+
+Nel caso in cui si intenda fare inferenza sulla media ma anche la varianza
+del modello e ignota occorre specicare una distribuzione a priori anche per
+questa. Considerando $s^2$ come una variabile casuale , si sa che $\frac{(n-1)s^2}{\sigma}$  e assumendo che $\frac{1}{\sigma}$ abbia una distribuzione Gamma, la distribuzione risultante
+per$\sigma$ e' una Gamma Inversa con parametri$(\gamma, \rho)$. Questa e poco concentrata
+intorno alla media (distribuzione non informativa) quando i parametri di
+scala e di forma $(\gamma, \rho)$$ sono piccoli.
+
+
+Nel caso in cui occorre stimare $\sigma^2$ si utilizza una distribuzione a priori anche
+per questo parametro che e denita Gamma inversa.
+
+
+
+
+
+## 1.4 Modello Poisson-Gamma
+Siano $X_1,X_2.X_n$ delle variabili casuali indipendenti con distribuzione di
+Poisson e parametro $\lambda>0$ . Considerando
+un campione di n realizzazioni indipendenti da tali variabili si dimostra che
+la log-verosimiglianza ha il kernel della distribuzione Gamma
+
+$$l(\lambda,x) \propto exp(-n.\lambda) exp[\log{\lambda} \sum_i x_i]$$
+- i =1...n
+
+Nel modello coniugato la distribuzione a priori per il parametro e una Gamma $\lambda \sim Gamma(\alpha, \beta)$ 
+- $\alpha% shape
+- $\beta$ scala(rate)
+
+$$ p(\lambda) = \frac{\beta^{\alpha}.\lambda^{\alpha-1}.exp(-\beta.\lambda)}{\Gamma(\alpha)}$$
+- $\alpha, \beta, \lambda > 0$ 
+
+Il parametro e denito a priori dai seguenti
+momenti
+- $E[\lambda] = \frac{\alpha}{\beta}$
+- $Moda = \frac{\alpha - 1}{\beta}$
+- $Var[\lambda] = \frac{\alpha}{\beta^2}$
+
+Si dimostra che la distribuzione a posteriori e ancora una Gamma si parla
+pertanto di modello coniugato:
+
+
+..........
+
+
+
+
+
+## 1.5 Modello multinomiale
 
 
 
@@ -345,6 +481,18 @@ Considerando il valore atteso della distribuzione a posteriori $E[\theta|x]= \mu
 
 
 
+## 1.6 Regioni di credibilita
+La regione di credibilita o intervallo a posteriori rappresenta un insieme di
+valori della distribuzione a posteriori e fornisce una stima intervallare per
+il parametro analogamente all'intervallo di condenza dell'inferenza classica
+
+
+### Definizione:
+SIa $\theta$ il il vettore dei parametri denito nello spazio parametrico $\Theta$ sia $C \subset \Theta$ si chiama regione di credibilita o regione di confidenza Bayesiana l'area della distribuzione a posteriori definita come segue.
+
+$$P(\thata \in C|X) >= 1-\alpha$$
+- $1-\alpha$ indica il livello di credibilita
+- $\alpha, C$ relativamente piccoli.
 
 
 
@@ -352,10 +500,14 @@ Considerando il valore atteso della distribuzione a posteriori $E[\theta|x]= \mu
 
 
 
+### 1.6.1 Intervalli centrali basati sui quantili
 
 
 
+### 1.6.2 Intervallo di credibilita con massima densita
 
+
+### 1.6.3 Bayes factor
 
 
 
