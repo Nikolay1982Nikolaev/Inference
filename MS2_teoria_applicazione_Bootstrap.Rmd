@@ -1,0 +1,424 @@
+---
+title: "MS2_2_1_bootstrap"
+author: "NikolayNikolaev"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+- Ricampionamento - ambito NON paramerico.
+- alternativa alle approssimazione asintotiche
+
+## Il ricampionamento:
+- le sole informazioni note sono rappresentatte dal campione
+- Logica: in mancanza di informazioni a priori che consentano di formulare delle ipotesi su $F(x)$ , si sfruttano intensamente i dati mediante il riutilizza iterato del campione.
+
+## Il Bootstrap:
+- tratta la distribuzione del campione se fosse la vera distribuzione della popolazione e approssima le caratterstiche della distribuzione di campionamento sconosciuta mediante simulazione.
+
+- $X$ la v.c. interprete del carattere sul quale si intende fare inferenza
+- $F(x)$ - la sua f.r. completamente ignota
+- $\psi$ l'oggetto di stima
+
+- si assume che $\psi$ possa esprimersi come funzione dell'ignota F vale a dire $\psi = \psi(F)$
+
+La logica e' la fusione di due techniche:
+- il princiio del *Plug-In* - rpincipio di sostituzione
+- l'approssimazione Monte Carlo, che determina il ricorso alle simulazioni al clcolatore
+
+Plug-In:
+- la stuna per $\psi=\psi(F)$ si costruisce **sostituendo** all'ignota F, la funzione di ripartizione empirica: $\hat{\psi} = \hat{\psi}(\hat{F_n})$
+
+La procedura Bootstrap:
+1. fissato il campione originario $x_1, ...,x_n$ al suo valore osservato e scelto un intero B sufficientemente elevato, si estraggono dal campione originario, B campioni bernoulliani e di ampiezza n, indipendenti l\uno dal altro. Questo e' Ricampionamento.
+
+2. su ciascuno dei campioni Bootstrap prodotti al passo 1, si calcola la replicazione $\hat{\psi^*}$ di $\hat{\psi}$ ottenendo l'insieme di B valori $\hat{\psi_1^*}... \hat{\psi_b^*}... \hat{\psi_B^*}$
+
+3. si calocla la varianza dei B valori prodotti al passo 2, pttenendo la quantita:
+
+$$\hat{\psi_{boot}(\hat{\Theta})} = \frac{1}{B-1} \sum_{b=1}^B (\hat{\psi^*} - \bar{\psi^*})^2$$ 
+
+- $\bar{\psi^*} = \sum_{b=1}^B \hat{\psi_b} / B$ - la media aritmetica delle B replicazioni.
+
+Erorre standard: ....
+
+
+Numero di campioni estrati: 
+$$\binom{2n-1}{n}$$
+
+
+Osservazioni:
+- bootstrap applicabile qualunque sia la forma funzionale di $\hat{\Theta}$
+
+- per un numero elevato
+
+
+## EPLICAZIONE:
+
+### Dati Nervo:
+
+I dati della serie di 799 tempi di attesa tra pulsazioni successive lungo la fibra del nervo, analizzati nel seguito.
+
+```{r}
+nervo<-read.table("data/nervo.dat", header = TRUE)
+head(nervo$A)
+
+require(skimr)
+skim_without_charts(nervo)
+```
+
+
+I tempi variabo da 0.01 a 1.38 mile secondi e si nota l'asimmetria della distribuzione in quanto la media e' superiore alla mediana.
+
+```{r}
+boxplot(nervo$A, xlab="Pulsazioni", horizontal=TRUE, col = "brown")
+```
+
+Si nota che la mediana di 0.15 e' maggiormente rappresentata nei dati rispetto alla media.
+
+```{r}
+hist(nervo$A,
+breaks = 50,
+ylim=c(0,5),
+main = "Pulsazioni fibra del nervo",
+ylab="Densità",
+freq =FALSE,
+col = "grey")
+```
+
+Per verifica si disegna la curva della densità esponenziale con media (1/mean(tasso)) pari a quella
+osservata nei dati campionari e si aggiunge la distribuzione empirica, si calcola il tasso
+
+```{r}
+rateA <- 1/mean(nervo$A); rateA
+
+x<-seq(0, 1.4, length=799)
+h<-dexp(x,rate = rateA)
+
+plot(x,
+     h,
+     ylim=c(0,5),
+     type="l", 
+     col = "blue",
+     lwd = 3,
+     xlab = "pulsazioni",
+     ylab = "densità")
+hist(nervo$A,
+     breaks = 50,
+     col = rgb(0, 0, 1, 1/4),
+     freq =FALSE, 
+     add=T)
+legend(0.8,
+       3, 
+       c("teorica", "campione"),
+       col = c("blue", "lightblue"),
+       lty = c(1,1),
+       lwd = c(2,1),
+       cex = 0.6)
+```
+
+Si disegna la funzione di ripartizione empirica che rappresenta lo stimatore di sostituzione plug-in della funzione di ripartizione teorica
+
+e Si aggiunge alla funzione empirica la funzione teorica
+
+```{r}
+plot(ecdf(nervo$A),
+     col="lightblue",
+     main= "Funz. di ripartizione")
+#
+curve(pexp(x,
+           rate=rateA),
+      lty='dashed',
+      col='red',
+      lwd='3',
+      add=TRUE)
+#
+legend(0.8,
+       0.4, 
+       col=c("lightblue","red"),
+       c("f.r. empirica","f.r. teorica"), 
+       lty=c(1,2),
+       cex=0.7)
+```
+
+### Indice di asimmetria:
+
+Considerando che per una variabile casuale X con media $\mu$ e varianza $\sigma^2$ l'asimmetria e':
+
+$$ k = E [\frac{(X-\mu)^3}{\sigma^3}]$$
+- se e distribuzione normale $k=0$
+
+L'usuale stima dell'indice di asimmetria si ottiene con lo stimaore di sostituzione o plug-in che e'
+
+$$\hat{k} = T(\hat{F_n}) = \frac{1/n \sum_i^n (X_i - \bar{X_n})}{\hat{\sigma^3}}$$
+
+```{r}
+require(e1071)
+skewness(nervo$A)
+```
+
+## Finaly Bootstrop part:
+Dato che lo stimatore $k$ non ha distribuzione nota si puo associare alla stima puntuale dell'assimetria ottenuta con lo stimatore di sostituzione una misura della sua variabilita:
+
+A questo punto occorre allplicare il metodo bootstrap attraverso i seguenti passi:
+1. si termina $X_1^*,...X_n^* \sim \hat{F_n}$ 
+2. si calcola per ogni determinazione il valore della statistica $T_n^* - g(X_1^*,...X_n^*)$ 
+3. Si ripetono B volte i passi 1 e 2 e si ottengono i valori $T_{n,1}^*,...T_{n,B}^*$
+4. si calocla la deviazione standard:
+
+### PASO 1:
+si ottiene il primo campione del campione originario 
+```{r}
+# primo campione
+n <- length(nervo$A)
+B1 <- sample(nervo$A, n, replace=TRUE)
+# secondo campione
+B2 <- sample(nervo$A, n, replace = TRUE)
+summary(B2)
+# terzo campione
+B3 <- sample(nervo$A, n, replace = TRUE)
+summary(B3)
+
+```
+
+### PASO 2: 
+si calcola il valore dell'indice di asimetria in ogni campione ed il valori realizzati per ogni replicazione si salvano nel vettore $s$
+
+```{r}
+s1<-skewness(B1)
+s2<-skewness(B2)
+s3<-skewness(B3)
+s <- c(s1,s2,s3); s
+
+# oppure:
+BB<-cbind(B1,B2,B3)
+apply(BB,2,skewness)
+```
+
+### PASO 3: 
+si calcola la deviazione standard delle replicazioni bootstrap si tratta della stima per 'lerrore standard da associare al valore dell'indice di asimmetria calocato sul cmpione dei dati originario attraverso lo stimatpre plug-in e' pari a 1.76
+
+```{r}
+sd(s)
+```
+
+### Utilizzao del ciclo for:
+
+Nel seguente codice si campiona 1000 volte dal vettore nervo e si salva il valore realizzato su
+ogni campione dell’indice di asimmnetria in Tboot. Poi si calcola la deviazione standard di
+queste realizzazioni
+
+```{r}
+B <- 1000
+n <- length(nervo$A)
+Tboot <- rep(0, B)
+set.seed(16253)
+
+for (i in 1:B) {
+  Xstar <- sample(nervo$A,
+                  n,
+                  replace = TRUE)
+  Tboot[i] <- e1071::skewness(Xstar)
+  }
+head(Tboot)
+
+summary(Tboot)
+
+seTboot <- sd(Tboot); seTboot
+```
+
+L’accuratezza per il valore di simmetria calcolato con lo stimatore plug-in sul campione originario
+è stimata con il metodo bootstrap in base a 1000 replicazioni del campione originario
+ed è pari a 0.16 (come si vede è minore di quello calcolato con 𝐵 = 3).
+Ovviamente come per qualsiasi altra procedura statistica, è fondamentale che i dati siano
+sufficientemente informativi sul fenomeno di interesse.
+
+##################
+
+# PARTE 2: INTERVALLI DI CONFIDENZA:
+
+La probabilita l'intervallo di condenza produca un intervallo che veramente include
+il valore del parametro  e chiamata livello di condenza.
+
+Generalmente si impiega una quantita pivotale per calcolare l'intervallo $[T_L; T_U]$
+e chiamato intervallo di condenza ed e denito come
+
+$P[T_L(Y) =< \theta =< T_U(Y)] = 1- \alpha$
+- $1-\alpha$ e' la prob che l'intervallo $T_1, T_2$ incluida $\\theta$
+
+## A: Metodo del percentile:
+
+- si calcola le B replicazioni per $\hat{\nu_b^*}$ di $\hat{\nu}$ per ogni campione bootstrap
+- si disegna l'istogramma bootstrap utilizzando la distribuzione bootstra $\{\hat{\nu_1^*} ... \hat{\nu_B^*} \}$ per $\hat{\Theta}$
+
+### Aplicazione:
+
+Come nell’inferenza classica anche in questo contesto è preferibile riportare accanto alla
+stima puntuale per il parametro $\theta$jio un intervallo di confidenza e la probabilità di copertura
+chiamata livello di confidenza.
+
+### Metodo del percentile: 
+si considerano i dati dei tempi delle pulsazioni e la stima dell'indici di asimmetria:
+
+```{r}
+nervo<-read.table("data/nervo.dat", header = TRUE)
+```
+
+Si ottiene la distribuzione bootstrap utilizzando 𝐵=1000 campioni e si aggiunge il valore
+della stima calcolato nei dati osservati
+
+```{r}
+B <- 1000
+n <- length(nervo$A)
+Tboot <- rep(0, B)
+
+for (i in 1:B) {
+  Xstar <- sample(nervo$A,
+                  n,
+                  replace = TRUE)
+  Tboot[i] <- e1071::skewness(Xstar)
+}
+
+sk <- e1071::skewness(nervo$A) 
+
+hist(Tboot,
+     breaks=50,
+     freq=FALSE,
+     main = "Distribuzione con 1000 realizzazioni bootstrap",
+     xlab = "Indice di asimmetria",
+     ylim = c(0,4),
+     col= "gray",
+     ylab = "Densità",
+     xlim = c(1,2.5))
+
+abline(v = sk, col="red")
+legend("topleft", 
+       2,
+       c("valore sul campione"),
+       col = "red",
+       lty= 1,
+       cex = 0.8)
+```
+L’intervallo di confidenza bootstrap ottenuto il metodo del percentile si calcola in base alla
+distribuzione empirica delle replicazioni bootstrap.
+Quando si utilizza il metodo del percentile come estremi dell’intervallo di confidenza si prendono
+i quantili della distribuzione ad un fissato il livello di confidenza ad esempio 0.95.
+Pertanto questo è un intervallo di confidenza al 95% per l’indice di asimmetria.
+Ricordiamo che:
+- L’intervallo di confidenza è un intervallo di valori intorno alla stima puntuale del
+parametro entro il quale si ritiene plausibile che sia contenuto il vero valore del
+parametro con un certo livello di confidenza.
+- Il livello di confidenza è una probabilità che va riferita ad un intervallo di confidenza
+con estremi aleatori nel campionamento ripetuto.
+- Il valore 0.95 invece non è la probabilità che $\theta$ appartenga all’intervallo osservato.
+- Abbiamo fiducia che $\theta$ appartenga all’intervallo osservato perchè la procedura lo comprende
+nel 95% dei casi.
+
+L’istogramma della distribuzione bootstrap può essere completato con il valore medio ottenuto
+dalle replicazioni bootstrap e con gli estremi dell’intervallo di confidenza
+
+```{r}
+sB<- mean(Tboot)
+Q <- quantile(Tboot, c(0.025, 0.975))
+Q[1]; Q[2]
+
+hist(Tboot,
+     breaks = 60,
+     freq=FALSE,
+     main = "Distribuzione con 1000 realizzazioni bootstrap",
+     xlab = "Indice di asimmetria",
+     ylim = c(0,4),
+     col = "gray",
+     ylab = " Densità",
+     xlim = c(1, 3))
+#
+abline( v = c(sk, sB, Q[1], Q[2]),
+        col = c("red", "blue", "green", "green"))
+#
+legend(2.5,
+       2.5,
+       c("valore or", "media boot","conf. int1", "conf. int2"),
+       col = c("red", "blue", "green", "green"),
+       lty = c(1,1,1,1),
+       lwd = c(3,3,3,3),
+       cex = 0.7)
+```
+
+### 2. Il metodo Bias Corrected Accelerated Bootstrap
+
+Non e raro nella pratica moderna il caso in cui non si disponga di uno stimatore
+corretto per $\nu$ e si renda necessario l'impiego di stimatori distorti. Ad
+esempio, e noto che la stima di massima verosimiglianza non garantisce la
+non distorsione degli stimatori prodotti.
+
+Accanto ai quantili della distribuzione bootstrap, gli estremi dell'IC bootstrap
+Bca dipendono da due costanti nominate nel modo seguente:
+- $a$ - constatnte di accelerazione
+- $z_0$ costante di correzione per la distrsione
+
+### Aplicazione:
+L’intervallo di confidenza con il metodo Bias Corrected Accellerated bootstrap si calcola
+con la funzione bcanon presente nella libreria bootstrap che richiede come input il
+vettore dei dati, il numero di replicazioni bootstrap e la funzione (theta) riferita allo stimatore
+
+```{r}
+n
+
+B<-1000
+theta<-e1071::skewness
+require(bootstrap)
+set.seed(1013)
+CIbca<-bcanon(nervo$A, 
+              B,
+              theta,
+              alpha = c(0.025, 0.975))
+CIbca$confpoints
+```
+
+Si nota che gli estremi inferiore e superiore dell’intervallo di confidenza al 95% ottenuti con il
+metodo bca sono 1.47 e 2.13, rispettivamente. Differiscono da quelli calcolati con il metodo
+del percentile. Infatti la funzione restituisce anche i valori stimati delle due costanti:
+- $a$ - constatnte di accelerazione
+- $z_0$ costante di correzione per la distrsione
+e questi sono diversi da zero
+
+```{r}
+CIbca$acc
+
+CIbca$z0
+```
+Gli estremi dell’intervallo ottenuti con questo metodo possono essere aggiunti al grafico nel
+modo seguente:
+
+```{r}
+hist(Tboot,
+     breaks = 60,
+     freq=FALSE,
+     main = "Distribuzione bootstrap con 1000 realizzazioni bootstrap",
+     xlab = "Indice di asimmetria",
+     ylim = c(0,4),
+     col = "gray",
+     ylab = " Densità",
+     xlim = c(1, 3))
+#
+abline( v = c(sk,
+              sB,
+              Q[1],
+              Q[2],
+              CIbca[["confpoints"]][3],
+              CIbca[["confpoints"]][4]),
+col = c("red","blue","green","green","pink","pink"))
+#
+legend(2.6, 2.5, c("valore or", "media boot", "conf. int1",
+                   "conf. int2", "conf. abc1", "conf. abc2"),
+       col = c("red", "blue", "green", "green", "pink", "pink"),
+       lty = c(1,1,1,1,1,1),
+       lwd = c(3,3,3,3,3,3),
+       cex = 0.7)
+```
+
+Il valore dell’indice di asimmetria per le pulsazioni consecutive lungo la fibra del nervo è
+compreso tra questi due estremi con una fiducia di 0.95.
